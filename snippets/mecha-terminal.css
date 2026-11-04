@@ -1,0 +1,76 @@
+/* ==========================================================================
+   MECHA-TERMINAL // Obsidian Brutalist Tactical Theme Snippet
+   Drop into .obsidian/snippets/mecha-terminal.css
+   Architected by ArabellaDemon (Obsidian Forum & Arabellanine)
+   ========================================================================== */
+
+.theme-dark {
+  --background-primary: #07090e;
+  --background-primary-alt: #0b1017;
+  --background-secondary: #0d121a;
+  --background-secondary-alt: #101622;
+  --background-modifier-border: #1c2638;
+  --background-modifier-form-field: #131923;
+  
+  --text-normal: #94a3b8;
+  --text-muted: #64748b;
+  --text-faint: #475569;
+  --text-accent: #f59e0b;
+  --text-accent-hover: #d97706;
+  
+  --font-monospace: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --font-interface: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --font-text: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  
+  --interactive-accent: #f59e0b;
+  --interactive-accent-hover: #d97706;
+}
+
+/* Brutalist Angular Vault Tree & Modals */
+.workspace-leaf, .modal, .menu {
+  border: 1px solid #1c2638 !important;
+  border-radius: 0px !important;
+}
+
+/* Tactical Amber Headings */
+.markdown-rendered h1, .HyperMD-header-1 {
+  color: #f8fafc !important;
+  border-bottom: 2px solid #2a3a54 !important;
+  padding-bottom: 6px !important;
+  letter-spacing: -0.02em !important;
+}
+.markdown-rendered h2, .HyperMD-header-2 {
+  color: #f59e0b !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+.markdown-rendered h3, .HyperMD-header-3 {
+  color: #06b6d4 !important;
+}
+
+/* Chamfered Tactical Badges / Tags */
+.tag {
+  background-color: #101622 !important;
+  border: 1px solid #2a3a54 !important;
+  color: #f59e0b !important;
+  border-radius: 0px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  padding: 2px 6px !important;
+}
+
+/* Callout Box Brutalist Framing */
+.callout {
+  border-radius: 0px !important;
+  border: 1px solid #2a3a54 !important;
+  background-color: #0b1017 !important;
+  position: relative !important;
+}
+.callout::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -1px !important; left: -1px !important;
+  width: 8px !important; height: 8px !important;
+  border-top: 2px solid #f59e0b !important;
+  border-left: 2px solid #f59e0b !important;
+}
