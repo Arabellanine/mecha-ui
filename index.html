@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Retro-Brutalist Tactical Design System</title>
+  <style>
+    :root {
+      --bg-void: #07090e;
+      --bg-panel: #0d1117;
+      --bg-card: #131923;
+      --border-dim: #212c3d;
+      --border-bright: #384b66;
+      --text-muted: #64748b;
+      --text-main: #94a3b8;
+      --text-bright: #f8fafc;
+      
+      --tactical-amber: #f59e0b;
+      --tactical-amber-glow: rgba(245, 158, 11, 0.25);
+      --alert-crimson: #ef4444;
+      --alert-crimson-glow: rgba(239, 68, 68, 0.3);
+      --system-emerald: #10b981;
+      --system-emerald-glow: rgba(16, 185, 129, 0.25);
+      --telemetry-cyan: #06b6d4;
+      --telemetry-cyan-glow: rgba(6, 182, 212, 0.25);
+      
+      --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Scanline & CRT Vignette */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+    }
+    body.no-crt .crt-overlay { opacity: 0; }
+
+    /* Top Command Header */
+    header.hud-bar {
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--border-dim);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      background: var(--alert-crimson);
+      color: #000;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 3px 6px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: 0.08em;
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      color: var(--text-bright);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .btn:hover {
+      background: var(--border-bright);
+      color: #fff;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-amber {
+      border-color: var(--tactical-amber);
+      color: var(--tactical-amber);
+    }
+    .btn-amber:hover {
+      background: var(--tactical-amber);
+      color: #000;
+      box-shadow: 0 0 12px var(--tactical-amber-glow);
+    }
+
+    .btn-crimson {
+      border-color: var(--alert-crimson);
+      color: var(--alert-crimson);
+    }
+    .btn-crimson:hover {
+      background: var(--alert-crimson);
+      color: #fff;
+      box-shadow: 0 0 12px var(--alert-crimson-glow);
+    }
+
+    .btn-mode-active {
+      background: var(--telemetry-cyan);
+      color: #000;
+      border-color: var(--telemetry-cyan);
+      font-weight: 700;
+    }
+
+    /* Layout Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* Mode Views */
+    #behance-showcase-view { display: none; }
+    body.showcase-mode #playground-view { display: none; }
+    body.showcase-mode #behance-showcase-view { display: block; }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+    }
+    .section-tag {
+      font-size: 11px;
+      color: var(--tactical-amber);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .section-title {
+      font-size: 18px;
+      color: var(--text-bright);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    /* Grid Modules */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .hud-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      padding: 20px;
+      position: relative;
+    }
+    .hud-panel::before {
+      content: "";
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 8px; height: 8px;
+      border-top: 2px solid var(--tactical-amber);
+      border-left: 2px solid var(--tactical-amber);
+    }
+    .hud-panel::after {
+      content: "";
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 8px; height: 8px;
+      border-bottom: 2px solid var(--telemetry-cyan);
+      border-right: 2px solid var(--telemetry-cyan);
+    }
+
+    .panel-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Telemetry Bar */
+    .meter-container {
+      margin-bottom: 16px;
+    }
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .meter-track {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      height: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+    }
+    .meter-block {
+      flex: 1;
+      height: 100%;
+      background: var(--border-dim);
+      transition: background 0.2s ease;
+    }
+    .meter-block.active-amber { background: var(--tactical-amber); box-shadow: 0 0 6px var(--tactical-amber-glow); }
+    .meter-block.active-cyan { background: var(--telemetry-cyan); box-shadow: 0 0 6px var(--telemetry-cyan-glow); }
+    .meter-block.active-emerald { background: var(--system-emerald); box-shadow: 0 0 6px var(--system-emerald-glow); }
+    .meter-block.active-crimson { background: var(--alert-crimson); box-shadow: 0 0 6px var(--alert-crimson-glow); }
+
+    /* Tactical Toggle Switch */
+    .switch-group {
+      display: flex;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      padding: 2px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+    .switch-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+    }
+    .switch-btn.active {
+      background: var(--tactical-amber);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 10px var(--tactical-amber-glow);
+    }
+
+    /* Rotary Dial Controller */
+    .dial-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px 0;
+    }
+    .dial-plate {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a2230 40%, #0d121a 70%);
+      border: 2px solid var(--border-bright);
+      position: relative;
+      cursor: grab;
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.5);
+    }
+    .dial-plate:active { cursor: grabbing; }
+    .dial-notch {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 16px;
+      background: var(--alert-crimson);
+      border-radius: 2px;
+      box-shadow: 0 0 8px var(--alert-crimson-glow);
+    }
+    .dial-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: 0.1em;
+    }
+
+    /* Guarded Button */
+    .guarded-box {
+      border: 1px dashed var(--alert-crimson);
+      padding: 16px;
+      background: rgba(239, 68, 68, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .safety-cover {
+      width: 100%;
+      background: repeating-linear-gradient(45deg, #181111, #181111 10px, #361717 10px, #361717 20px);
+      border: 1px solid var(--alert-crimson);
+      padding: 8px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--alert-crimson);
+      cursor: pointer;
+      user-select: none;
+      letter-spacing: 0.15em;
+      transition: all 0.2s ease;
+    }
+    .safety-cover.open {
+      background: #091a13;
+      border-color: var(--system-emerald);
+      color: var(--system-emerald);
+    }
+
+    /* BEHANCE SHOWCASE PRESENTATION BOARDS */
+    .behance-board {
+      background: #090c10;
+      border: 1px solid var(--border-bright);
+      padding: 48px;
+      margin-bottom: 48px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    .board-header {
+      border-bottom: 2px solid var(--border-bright);
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .board-num {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--tactical-amber);
+      line-height: 1;
+    }
+    .board-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .swatch-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      padding: 16px;
+    }
+    .swatch-color {
+      height: 48px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+
+  <!-- Header -->
+  <header class="hud-bar">
+    <div class="brand-cluster">
+      <div class="brand-logo">AB-9</div>
+      <div>
+        <div class="brand-title">MECHA-UI // SPEC 2.0</div>
+        <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em;">TACTICAL RETRO-BRUTALIST SYSTEM</div>
+      </div>
+    </div>
+    <div class="hud-controls">
+      <button class="btn" id="btn-audio-toggle">AUDIO: <span style="color:var(--system-emerald);" id="audio-status">ACTIVE</span></button>
+      <button class="btn" id="btn-crt-toggle">CRT SCAN: <span style="color:var(--tactical-amber);" id="crt-status">ON</span></button>
+      <button class="btn btn-amber" id="btn-mode-toggle">BEHANCE SHOWCASE VIEW</button>
+    </div>
+  </header>
+
+  <!-- INTERACTIVE PLAYGROUND VIEW -->
+  <main class="container" id="playground-view">
+    
+    <div class="section-header">
+      <div>
+        <div class="section-tag">TELEMETRY & HARDWARE CONTROLS</div>
+        <div class="section-title">ACTIVE COCKPIT INSTRUMENTATION</div>
+      </div>
+      <div style="font-size: 11px; color: var(--system-emerald);">● SYSTEM ONLINE · 120 FPS</div>
+    </div>
+
+    <div class="hud-grid">
+      
+      <!-- Panel 1: Telemetry Gauges -->
+      <div class="hud-panel">
+        <div class="panel-label">
+          <span>// 01 · POWER OUTPUT</span>
+          <span style="color:var(--telemetry-cyan);">KW/H CH-4</span>
+        </div>
+        
+        <div class="meter-container">
+          <div class="meter-label">
+            <span>CORE REACTOR LOAD</span>
+            <span id="load-val" style="color:var(--tactical-amber);">68%</span>
+          </div>
+          <div class="meter-track" id="reactor-meter"></div>
+        </div>
+
+        <div class="meter-container">
+          <div class="meter-label">
+            <span>COOLANT PRESSURE</span>
+            <span id="coolant-val" style="color:var(--telemetry-cyan);">42 PSI</span>
+          </div>
+          <div class="meter-track" id="coolant-meter"></div>
+        </div>
+
+        <div class="meter-container">
+          <div class="meter-label">
+            <span>THERMAL RADIANCE</span>
+            <span id="thermal-val" style="color:var(--alert-crimson);">ALERT</span>
+          </div>
+          <div class="meter-track" id="thermal-meter"></div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Tactile Switches & Knob -->
+      <div class="hud-panel">
+        <div class="panel-label">
+          <span>// 02 · ROTARY INDUCTOR</span>
+          <span style="color:var(--tactical-amber);">MANUAL CALIBRATION</span>
+        </div>
+
+        <div class="dial-wrapper">
+          <div class="dial-plate" id="main-dial">
+            <div class="dial-notch" id="dial-indicator"></div>
+          </div>
+          <div class="dial-val"><span id="dial-readout">000</span> <span style="font-size: 11px; color:var(--text-muted);">RAD/S</span></div>
+          <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Drag knob to modulate frequency</div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Guarded Execution Button -->
+      <div class="hud-panel">
+        <div class="panel-label">
+          <span>// 03 · WEAPON SAFETY COUPLING</span>
+          <span style="color:var(--alert-crimson);">CLASSIFIED</span>
+        </div>
+
+        <div class="switch-group">
+          <button class="switch-btn active" data-state="SAFE">SAFE</button>
+          <button class="switch-btn" data-state="STANDBY">STANDBY</button>
+          <button class="switch-btn" data-state="OVERDRIVE">OVERDRIVE</button>
+        </div>
+
+        <div class="guarded-box">
+          <div class="safety-cover" id="safety-cover">▲ SAFETY COVER ARMED (CLICK TO DISARM) ▲</div>
+          <button class="btn btn-crimson" id="btn-purge" disabled style="opacity: 0.4; width: 100%; justify-content: center; height: 38px;">
+            INITIATE SYSTEM PURGE
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Live Event Log -->
+    <div class="hud-panel" style="margin-top: 16px;">
+      <div class="panel-label">
+        <span>// SYSTEM LOG EVENT TELEMETRY</span>
+        <span style="color:var(--system-emerald);">STREAMING REAL-TIME</span>
+      </div>
+      <div id="event-stream" style="height: 120px; overflow-y: auto; font-size: 11px; line-height: 1.8; color: var(--text-muted);">
+        <div>[07:00:12] SYSTEM CORE INITIALIZED: ARABELLA COCKPIT RUNTIME ACTIVE</div>
+        <div>[07:00:14] TELEMETRY SENSORS LOCKED TO HIGH PRECISION CLOCK</div>
+      </div>
+    </div>
+
+  </main>
+
+
+  <!-- BEHANCE PRESENTATION SHOWCASE VIEW -->
+  <main class="container" id="behance-showcase-view">
+    
+    <!-- Board 1 -->
+    <div class="behance-board">
+      <div class="board-header">
+        <div>
+          <div class="board-title">MECHA-UI // ARCHITECTURE & PALETTE MATRIX</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">PROJECT SPECIFICATION · ARABELLA BLACKTHORNE</div>
+        </div>
+        <div class="board-num">01</div>
+      </div>
+      
+      <p style="font-size: 14px; max-width: 800px; color: var(--text-bright); line-height: 1.7;">
+        MECHA-UI is a zero-dependency design system inspired by 90s tactical anime cockpits, industrial command panels, and brutalist avionics. Built natively in vanilla HTML/CSS with semantic custom properties and synthesized Web Audio feedback.
+      </p>
+
+      <div class="swatch-grid">
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#f59e0b;"></div>
+          <div style="font-weight:700; color:#fff;">TACTICAL AMBER</div>
+          <div style="color:var(--text-muted); font-size:11px;">#f59e0b · Primary Warning</div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#ef4444;"></div>
+          <div style="font-weight:700; color:#fff;">ALERT CRIMSON</div>
+          <div style="color:var(--text-muted); font-size:11px;">#ef4444 · Critical Overdrive</div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#10b981;"></div>
+          <div style="font-weight:700; color:#fff;">SYSTEM EMERALD</div>
+          <div style="color:var(--text-muted); font-size:11px;">#10b981 · Safe Nominal</div>
+        </div>
+        <div class="swatch-card">
+          <div class="swatch-color" style="background:#06b6d4;"></div>
+          <div style="font-weight:700; color:#fff;">TELEMETRY CYAN</div>
+          <div style="color:var(--text-muted); font-size:11px;">#06b6d4 · Digital Data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Board 2 -->
+    <div class="behance-board">
+      <div class="board-header">
+        <div>
+          <div class="board-title">COMPONENT ANATOMY & SCANLINE SHADERS</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">TACTILE MODULAR READOUTS & HARDWARE SWITCHES</div>
+        </div>
+        <div class="board-num">02</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;">
+        <div style="background:var(--bg-card); border:1px solid var(--border-bright); padding:32px;">
+          <div style="font-size:11px; color:var(--tactical-amber); margin-bottom:8px;">// SPEC_01: SEGMENTED GAUGES</div>
+          <div style="color:#fff; font-size:16px; font-weight:700; margin-bottom:12px;">Dynamic Quantum Multi-Block Telemetry</div>
+          <p style="font-size:12px; color:var(--text-muted);">
+            Constructed with discrete CSS flex blocks simulating physical vacuum fluorescent displays (VFD) with hardware glow falloff.
+          </p>
+        </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border-bright); padding:32px;">
+          <div style="font-size:11px; color:var(--telemetry-cyan); margin-bottom:8px;">// SPEC_02: SYNTHESIZED SOUND</div>
+          <div style="color:#fff; font-size:16px; font-weight:700; margin-bottom:12px;">Web Audio Pure Oscillator Blips</div>
+          <p style="font-size:12px; color:var(--text-muted);">
+            Zero audio asset payload. Mechanical relays, switch thuds, and warning chirps synthesized on the fly via short square & sine wave envelopes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // Web Audio Synthesizer for Mechanical Clicks & Blips
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function playBlip(freq = 880, type = 'sine', duration = 0.04) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // Logging
+    function logEvent(text) {
+      const stream = document.getElementById('event-stream');
+      const time = new Date().toTimeString().split(' ')[0];
+      const entry = document.createElement('div');
+      entry.innerHTML = `<span style="color:var(--text-bright);">[${time}]</span> ${text}`;
+      stream.prepend(entry);
+    }
+
+    // Audio & CRT Toggles
+    document.getElementById('btn-audio-toggle').addEventListener('click', (e) => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audio-status').textContent = audioEnabled ? 'ACTIVE' : 'MUTED';
+      document.getElementById('audio-status').style.color = audioEnabled ? 'var(--system-emerald)' : 'var(--alert-crimson)';
+      if (audioEnabled) playBlip(640, 'square');
+    });
+
+    document.getElementById('btn-crt-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('no-crt');
+      const active = !document.body.classList.contains('no-crt');
+      document.getElementById('crt-status').textContent = active ? 'ON' : 'OFF';
+      playBlip(active ? 1200 : 400, 'triangle');
+    });
+
+    // Behance Presentation Mode Toggle
+    document.getElementById('btn-mode-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('showcase-mode');
+      const isShowcase = document.body.classList.contains('showcase-mode');
+      document.getElementById('btn-mode-toggle').textContent = isShowcase ? 'RETURN TO PLAYGROUND' : 'BEHANCE SHOWCASE VIEW';
+      playBlip(isShowcase ? 1400 : 700, 'sine', 0.08);
+      logEvent(isShowcase ? 'DISPLAY MODE SWITCHED: BEHANCE SHOWCASE MATRIX' : 'DISPLAY MODE SWITCHED: LIVE INTERACTIVE COCKPIT');
+    });
+
+    // Build Telemetry Blocks
+    function renderMeters() {
+      const configs = [
+        { id: 'reactor-meter', count: 20, active: 14, color: 'active-amber' },
+        { id: 'coolant-meter', count: 20, active: 8, color: 'active-cyan' },
+        { id: 'thermal-meter', count: 20, active: 17, color: 'active-crimson' }
+      ];
+      configs.forEach(cfg => {
+        const el = document.getElementById(cfg.id);
+        el.innerHTML = '';
+        for (let i = 0; i < cfg.count; i++) {
+          const block = document.createElement('div');
+          block.className = 'meter-block' + (i < cfg.active ? ' ' + cfg.color : '');
+          el.appendChild(block);
+        }
+      });
+    }
+    renderMeters();
+
+    // 3-State Switches
+    document.querySelectorAll('.switch-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        playBlip(520, 'square', 0.06);
+        logEvent(`SAFETY SWITCH ENGAGED: [${btn.dataset.state}]`);
+      });
+    });
+
+    // Guarded Safety Button
+    const safetyCover = document.getElementById('safety-cover');
+    const btnPurge = document.getElementById('btn-purge');
+    safetyCover.addEventListener('click', () => {
+      const isOpen = safetyCover.classList.toggle('open');
+      safetyCover.textContent = isOpen ? '▼ SAFETY COVER OPEN // WEAPON HOT ▼' : '▲ SAFETY COVER ARMED (CLICK TO DISARM) ▲';
+      btnPurge.disabled = !isOpen;
+      btnPurge.style.opacity = isOpen ? '1' : '0.4';
+      playBlip(isOpen ? 980 : 320, 'sawtooth', 0.08);
+      logEvent(isOpen ? 'WARNING: SYSTEM PURGE SAFETY DISENGAGED' : 'SYSTEM PURGE SAFETY RE-LOCKED');
+    });
+
+    btnPurge.addEventListener('click', () => {
+      playBlip(220, 'sawtooth', 0.3);
+      alert('// SYSTEM OVERDRIVE COMMENCED: ALL TELEMETRY RE-ROUTED');
+      logEvent('CRITICAL: PURGE PROTOCOL EXECUTED');
+    });
+
+    // Rotary Dial Controller
+    const dial = document.getElementById('main-dial');
+    const dialIndicator = document.getElementById('dial-indicator');
+    const dialReadout = document.getElementById('dial-readout');
+    let isDragging = false;
+    let angle = 0;
+
+    dial.addEventListener('mousedown', () => { isDragging = true; });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const rect = dial.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const rad = Math.atan2(e.clientY - cy, e.clientX - cx);
+      let deg = Math.round(rad * (180 / Math.PI)) + 90;
+      if (deg < 0) deg += 360;
+      angle = deg;
+      dialIndicator.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+      dialIndicator.style.transformOrigin = 'bottom center';
+      const val = String(Math.round((angle / 360) * 999)).padStart(3, '0');
+      dialReadout.textContent = val;
+      playBlip(200 + (angle * 2), 'sine', 0.02);
+    });
+  </script>
+</body>
+</html>
