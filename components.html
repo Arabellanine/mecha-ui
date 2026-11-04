@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Tactical Component Matrix</title>
+  <style>
+    :root {
+      --bg-void: #06080c;
+      --bg-panel: #0b0f17;
+      --bg-card: #101622;
+      --border-dim: #1d2736;
+      --border-bright: #31425a;
+      --border-highlight: #4d668b;
+      
+      --text-muted: #5e6f85;
+      --text-main: #8ea0b8;
+      --text-bright: #f1f5f9;
+      
+      --tactical-amber: #f59e0b;
+      --tactical-amber-glow: rgba(245, 158, 11, 0.28);
+      --alert-crimson: #ef4444;
+      --alert-crimson-glow: rgba(239, 68, 68, 0.32);
+      --system-emerald: #10b981;
+      --system-emerald-glow: rgba(16, 185, 129, 0.28);
+      --telemetry-cyan: #06b6d4;
+      --telemetry-cyan-glow: rgba(6, 182, 212, 0.28);
+      
+      --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Scanline & Subtle Vignette */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.85;
+    }
+
+    /* Master Board Canvas - 1600x1200 high density target */
+    .master-board {
+      width: 1400px;
+      background: var(--bg-panel);
+      border: 2px solid var(--border-bright);
+      position: relative;
+      padding: 48px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+    }
+
+    /* Corner Bracket Accents */
+    .corner-bracket {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-color: var(--tactical-amber);
+      pointer-events: none;
+    }
+    .corner-tl { top: -2px; left: -2px; border-top: 3px solid var(--tactical-amber); border-left: 3px solid var(--tactical-amber); }
+    .corner-tr { top: -2px; right: -2px; border-top: 3px solid var(--tactical-amber); border-right: 3px solid var(--tactical-amber); }
+    .corner-bl { bottom: -2px; left: -2px; border-bottom: 3px solid var(--telemetry-cyan); border-left: 3px solid var(--telemetry-cyan); }
+    .corner-br { bottom: -2px; right: -2px; border-bottom: 3px solid var(--telemetry-cyan); border-right: 3px solid var(--telemetry-cyan); }
+
+    /* Header Strip */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--border-bright);
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge-classified {
+      background: var(--alert-crimson);
+      color: #000;
+      font-weight: 900;
+      font-size: 11px;
+      padding: 4px 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    }
+
+    .title-main {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    .title-sub {
+      font-size: 11px;
+      color: var(--tactical-amber);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .meta-col {
+      text-align: right;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /* Grid Layout */
+    .components-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 32px;
+    }
+
+    .grid-col {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Panel Card */
+    .component-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      padding: 24px;
+      position: relative;
+    }
+    .panel-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 6px;
+    }
+
+    /* Buttons Cluster */
+    .btn-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-bright);
+      color: var(--text-bright);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--border-bright);
+      color: #fff;
+    }
+
+    .btn-amber {
+      border-color: var(--tactical-amber);
+      color: var(--tactical-amber);
+      background: rgba(245, 158, 11, 0.04);
+    }
+    .btn-amber:hover {
+      background: var(--tactical-amber);
+      color: #000;
+      box-shadow: 0 0 16px var(--tactical-amber-glow);
+    }
+
+    .btn-crimson {
+      border-color: var(--alert-crimson);
+      color: var(--alert-crimson);
+      background: rgba(239, 68, 68, 0.04);
+    }
+    .btn-crimson:hover {
+      background: var(--alert-crimson);
+      color: #fff;
+      box-shadow: 0 0 16px var(--alert-crimson-glow);
+    }
+
+    .btn-cyan {
+      border-color: var(--telemetry-cyan);
+      color: var(--telemetry-cyan);
+      background: rgba(6, 182, 212, 0.04);
+    }
+
+    .btn-status-pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    /* Segmented Bar Meters */
+    .meter-block-row {
+      margin-bottom: 18px;
+    }
+    .meter-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+    .meter-track {
+      height: 12px;
+      background: #070a0f;
+      border: 1px solid var(--border-bright);
+      display: flex;
+      gap: 3px;
+      padding: 2px;
+    }
+    .meter-segment {
+      flex: 1;
+      background: var(--border-dim);
+    }
+    .meter-segment.active-amber { background: var(--tactical-amber); box-shadow: 0 0 6px var(--tactical-amber-glow); }
+    .meter-segment.active-cyan { background: var(--telemetry-cyan); box-shadow: 0 0 6px var(--telemetry-cyan-glow); }
+    .meter-segment.active-emerald { background: var(--system-emerald); box-shadow: 0 0 6px var(--system-emerald-glow); }
+    .meter-segment.active-crimson { background: var(--alert-crimson); box-shadow: 0 0 6px var(--alert-crimson-glow); }
+
+    /* Segmented Switches */
+    .switch-group {
+      display: flex;
+      background: #080c12;
+      border: 1px solid var(--border-bright);
+      padding: 3px;
+      margin-bottom: 16px;
+    }
+    .switch-opt {
+      flex: 1;
+      text-align: center;
+      padding: 8px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .switch-opt.active {
+      background: var(--tactical-amber);
+      color: #000;
+      box-shadow: 0 0 10px var(--tactical-amber-glow);
+    }
+
+    /* Waveform Audio Spectrum */
+    .spectrum-container {
+      height: 70px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      background: #07090e;
+      border: 1px solid var(--border-dim);
+      padding: 8px;
+      margin-bottom: 14px;
+    }
+    .spectrum-bar {
+      flex: 1;
+      background: var(--telemetry-cyan);
+      box-shadow: 0 0 8px var(--telemetry-cyan-glow);
+      transition: height 0.2s ease;
+    }
+
+    /* Status Badges */
+    .badge-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .status-badge {
+      border: 1px solid var(--border-dim);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: #0a0e16;
+    }
+    .badge-amber { border-color: var(--tactical-amber); color: var(--tactical-amber); }
+    .badge-emerald { border-color: var(--system-emerald); color: var(--system-emerald); }
+    .badge-crimson { border-color: var(--alert-crimson); color: var(--alert-crimson); }
+    .badge-cyan { border-color: var(--telemetry-cyan); color: var(--telemetry-cyan); }
+
+    /* Footer Specs */
+    .board-footer {
+      border-top: 2px solid var(--border-bright);
+      margin-top: 40px;
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+
+  <main class="master-board">
+    <div class="corner-bracket corner-tl"></div>
+    <div class="corner-bracket corner-tr"></div>
+    <div class="corner-bracket corner-bl"></div>
+    <div class="corner-bracket corner-br"></div>
+
+    <!-- Header Section -->
+    <header class="header-bar">
+      <div class="brand-group">
+        <div class="badge-classified">BOARD_02 // SYSTEM COMPONENTS</div>
+        <div>
+          <h1 class="title-main">TACTICAL COMPONENT ANATOMY</h1>
+          <div class="title-sub">SPEC 2.4 // MODULAR COCKPIT CONTROL PRIMITIVES</div>
+        </div>
+      </div>
+      <div class="meta-col">
+        <div style="color:var(--text-bright); font-weight:700;">ARABELLANINE // MECHA-UI</div>
+        <div style="color:var(--system-emerald);">● QUANTUM LINK SYNCHRONIZED</div>
+        <div>DESIGNER: ARABELLA BLACKTHORNE</div>
+      </div>
+    </header>
+
+    <!-- Component Showcase Grid -->
+    <section class="components-grid">
+
+      <!-- Column 1: Action Controls & Buttons -->
+      <div class="grid-col">
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 01 · TACTICAL TRIGGER CONTROLS</span>
+            <span style="color:var(--tactical-amber);">STATE MATRICES</span>
+          </div>
+
+          <div class="btn-stack">
+            <button class="btn btn-amber">
+              <span>ENGAGE AUX REACTOR</span>
+              <span class="btn-status-pip"></span>
+            </button>
+            <button class="btn btn-cyan">
+              <span>INITIALIZE FREQ SCAN</span>
+              <span class="btn-status-pip"></span>
+            </button>
+            <button class="btn btn-crimson">
+              <span>SYSTEM EMERGENCY PURGE</span>
+              <span class="btn-status-pip"></span>
+            </button>
+            <button class="btn" style="opacity: 0.5;">
+              <span>STANDBY DISARMED</span>
+              <span class="btn-status-pip" style="background:#5e6f85;"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 02 · HARDWARE TRIPLE SWITCH</span>
+            <span style="color:var(--telemetry-cyan);">TRISTATE BUS</span>
+          </div>
+
+          <div class="switch-group">
+            <div class="switch-opt">MANUAL</div>
+            <div class="switch-opt active">AUTO-GUIDE</div>
+            <div class="switch-opt">OVERRIDE</div>
+          </div>
+
+          <div class="switch-group" style="margin-bottom:0;">
+            <div class="switch-opt active" style="background:var(--alert-crimson); color:#fff; box-shadow:0 0 10px var(--alert-crimson-glow);">HOT PURSUIT</div>
+            <div class="switch-opt">STEALTH</div>
+            <div class="switch-opt">DORMANT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: Vacuum Fluorescent Displays & Telemetry -->
+      <div class="grid-col">
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 03 · SEGMENTED VFD METERS</span>
+            <span style="color:var(--system-emerald);">16-BLOCK TELEMETRY</span>
+          </div>
+
+          <div class="meter-block-row">
+            <div class="meter-meta">
+              <span>CORE HARMONIC FLUX</span>
+              <span style="color:var(--tactical-amber);">87.4%</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment active-amber"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+            </div>
+          </div>
+
+          <div class="meter-block-row">
+            <div class="meter-meta">
+              <span>THERMAL COUPLING RATIO</span>
+              <span style="color:var(--telemetry-cyan);">62.1%</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment active-cyan"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+              <div class="meter-segment"></div>
+            </div>
+          </div>
+
+          <div class="meter-block-row" style="margin-bottom:0;">
+            <div class="meter-meta">
+              <span>RADIAL PLASMA OVERDRIVE</span>
+              <span style="color:var(--alert-crimson); font-weight:700;">CRITICAL · 94.8%</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment active-crimson"></div>
+              <div class="meter-segment"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 04 · STATUS BADGE MATRIX</span>
+            <span style="color:var(--text-bright);">SYSTEM ARRAYS</span>
+          </div>
+
+          <div class="badge-grid">
+            <div class="status-badge badge-emerald">
+              <span style="font-size:12px;">●</span> LINK ONLINE
+            </div>
+            <div class="status-badge badge-amber">
+              <span style="font-size:12px;">▲</span> HEURISTIC RAD
+            </div>
+            <div class="status-badge badge-cyan">
+              <span style="font-size:12px;">◆</span> CRYPTO BUS
+            </div>
+            <div class="status-badge badge-crimson">
+              <span style="font-size:12px;">✖</span> CORE PURGE
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: Spectrum Visualizer & HUD Readouts -->
+      <div class="grid-col">
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 05 · ACOUSTIC OSCILLATOR SPECTRUM</span>
+            <span style="color:var(--telemetry-cyan);">WEB AUDIO BUS</span>
+          </div>
+
+          <div class="spectrum-container">
+            <div class="spectrum-bar" style="height:35%;"></div>
+            <div class="spectrum-bar" style="height:55%;"></div>
+            <div class="spectrum-bar" style="height:85%;"></div>
+            <div class="spectrum-bar" style="height:45%;"></div>
+            <div class="spectrum-bar" style="height:70%;"></div>
+            <div class="spectrum-bar" style="height:100%;"></div>
+            <div class="spectrum-bar" style="height:60%;"></div>
+            <div class="spectrum-bar" style="height:90%;"></div>
+            <div class="spectrum-bar" style="height:40%;"></div>
+            <div class="spectrum-bar" style="height:75%;"></div>
+            <div class="spectrum-bar" style="height:50%;"></div>
+            <div class="spectrum-bar" style="height:30%;"></div>
+          </div>
+
+          <div style="font-size:11px; color:var(--text-muted); line-height: 1.6;">
+            Zero external audio assets. Mechanical relay thuds, frequency modulation chirps, and warning sweeps synthesized entirely via Web Audio API.
+          </div>
+        </div>
+
+        <div class="component-panel">
+          <div class="panel-tag">
+            <span>// 06 · DATA READOUT & CODE BLOCK</span>
+            <span style="color:var(--tactical-amber);">DOM SYNTAX</span>
+          </div>
+
+          <div style="background:#070a0f; border:1px solid var(--border-dim); padding:12px; font-size:10px; line-height:1.7; color:var(--text-bright);">
+            <div style="color:var(--tactical-amber);">&lt;button class="btn btn-amber"&gt;</div>
+            <div style="padding-left:14px; color:var(--text-main);">&lt;span&gt;SYSTEM ENGAGE&lt;/span&gt;</div>
+            <div style="padding-left:14px; color:var(--telemetry-cyan);">&lt;span class="pip"&gt;&lt;/span&gt;</div>
+            <div style="color:var(--tactical-amber);">&lt;/button&gt;</div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Footer Meta -->
+    <footer class="board-footer">
+      <div>ZERO DEPENDENCIES // NATIVE VANILLA CSS & HTML // WEB AUDIO API ENGINES</div>
+      <div style="letter-spacing: 0.1em; color:var(--tactical-amber);">ARABELLA SOVEREIGN LEGION © 2026</div>
+    </footer>
+
+  </main>
+
+</body>
+</html>
