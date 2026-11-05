@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MECHA-UI // Retro-Brutalist Tactical Design System</title>
+  <link rel="stylesheet" href="snippets/mecha-status.css">
   <style>
     :root {
       --bg-void: #07090e;
@@ -412,6 +413,9 @@
         <div class="brand-title">MECHA-UI // SPEC 2.0</div>
         <div style="font-size: 10px; color: var(--text-muted); letter-spacing: 0.1em;">TACTICAL RETRO-BRUTALIST SYSTEM</div>
       </div>
+      <div class="mecha-status-module status-deployed" style="margin-left: 12px; font-size: 10px; padding: 4px 10px;">
+        // DEPLOYED v1.0.0 [LIVE]
+      </div>
     </div>
     <div class="hud-controls">
       <button class="btn" id="btn-audio-toggle">AUDIO: <span style="color:var(--system-emerald);" id="audio-status">ACTIVE</span></button>
@@ -622,100 +626,115 @@
       stream.prepend(entry);
     }
 
-    // Audio & CRT Toggles
-    document.getElementById('btn-audio-toggle').addEventListener('click', (e) => {
+    // Gauge Builder
+    function createBlocks(containerId, count, activeCount, colorClass) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const b = document.createElement('div');
+        b.className = 'meter-block' + (i < activeCount ? ' ' + colorClass : '');
+        el.appendChild(b);
+      }
+    }
+
+    // Initialize Telemetry
+    createBlocks('reactor-meter', 20, 14, 'active-amber');
+    createBlocks('coolant-meter', 20, 8, 'active-cyan');
+    createBlocks('thermal-meter', 20, 18, 'active-crimson');
+
+    // Toggles
+    const btnAudio = document.getElementById('btn-audio-toggle');
+    const audioStatus = document.getElementById('audio-status');
+    btnAudio.addEventListener('click', () => {
       audioEnabled = !audioEnabled;
-      document.getElementById('audio-status').textContent = audioEnabled ? 'ACTIVE' : 'MUTED';
-      document.getElementById('audio-status').style.color = audioEnabled ? 'var(--system-emerald)' : 'var(--alert-crimson)';
-      if (audioEnabled) playBlip(640, 'square');
+      audioStatus.textContent = audioEnabled ? 'ACTIVE' : 'MUTED';
+      audioStatus.style.color = audioEnabled ? 'var(--system-emerald)' : 'var(--text-muted)';
+      playBlip(520, 'square', 0.03);
+      logEvent(`AUDIO SUBSYSTEM TOGGLED: ${audioEnabled ? 'ONLINE' : 'MUTED'}`);
     });
 
-    document.getElementById('btn-crt-toggle').addEventListener('click', () => {
+    const btnCrt = document.getElementById('btn-crt-toggle');
+    const crtStatus = document.getElementById('crt-status');
+    btnCrt.addEventListener('click', () => {
       document.body.classList.toggle('no-crt');
       const active = !document.body.classList.contains('no-crt');
-      document.getElementById('crt-status').textContent = active ? 'ON' : 'OFF';
-      playBlip(active ? 1200 : 400, 'triangle');
+      crtStatus.textContent = active ? 'ON' : 'OFF';
+      crtStatus.style.color = active ? 'var(--tactical-amber)' : 'var(--text-muted)';
+      playBlip(740, 'sine', 0.03);
+      logEvent(`CRT SCANLINE EMULATION: ${active ? 'ENGAGED' : 'BYPASS'}`);
     });
 
-    // Behance Presentation Mode Toggle
-    document.getElementById('btn-mode-toggle').addEventListener('click', () => {
+    const btnMode = document.getElementById('btn-mode-toggle');
+    btnMode.addEventListener('click', () => {
       document.body.classList.toggle('showcase-mode');
-      const isShowcase = document.body.classList.contains('showcase-mode');
-      document.getElementById('btn-mode-toggle').textContent = isShowcase ? 'RETURN TO PLAYGROUND' : 'BEHANCE SHOWCASE VIEW';
-      playBlip(isShowcase ? 1400 : 700, 'sine', 0.08);
-      logEvent(isShowcase ? 'DISPLAY MODE SWITCHED: BEHANCE SHOWCASE MATRIX' : 'DISPLAY MODE SWITCHED: LIVE INTERACTIVE COCKPIT');
+      const showcase = document.body.classList.contains('showcase-mode');
+      btnMode.textContent = showcase ? 'INTERACTIVE PLAYGROUND' : 'BEHANCE SHOWCASE VIEW';
+      btnMode.className = showcase ? 'btn btn-mode-active' : 'btn btn-amber';
+      playBlip(620, 'sine', 0.05);
+      logEvent(`VIEWPORT MATRIX SWITCHED: ${showcase ? 'BEHANCE_SHOWCASE' : 'PLAYGROUND'}`);
     });
 
-    // Build Telemetry Blocks
-    function renderMeters() {
-      const configs = [
-        { id: 'reactor-meter', count: 20, active: 14, color: 'active-amber' },
-        { id: 'coolant-meter', count: 20, active: 8, color: 'active-cyan' },
-        { id: 'thermal-meter', count: 20, active: 17, color: 'active-crimson' }
-      ];
-      configs.forEach(cfg => {
-        const el = document.getElementById(cfg.id);
-        el.innerHTML = '';
-        for (let i = 0; i < cfg.count; i++) {
-          const block = document.createElement('div');
-          block.className = 'meter-block' + (i < cfg.active ? ' ' + cfg.color : '');
-          el.appendChild(block);
-        }
-      });
-    }
-    renderMeters();
-
-    // 3-State Switches
-    document.querySelectorAll('.switch-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.parentElement.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        playBlip(520, 'square', 0.06);
-        logEvent(`SAFETY SWITCH ENGAGED: [${btn.dataset.state}]`);
-      });
-    });
-
-    // Guarded Safety Button
-    const safetyCover = document.getElementById('safety-cover');
-    const btnPurge = document.getElementById('btn-purge');
-    safetyCover.addEventListener('click', () => {
-      const isOpen = safetyCover.classList.toggle('open');
-      safetyCover.textContent = isOpen ? '▼ SAFETY COVER OPEN // WEAPON HOT ▼' : '▲ SAFETY COVER ARMED (CLICK TO DISARM) ▲';
-      btnPurge.disabled = !isOpen;
-      btnPurge.style.opacity = isOpen ? '1' : '0.4';
-      playBlip(isOpen ? 980 : 320, 'sawtooth', 0.08);
-      logEvent(isOpen ? 'WARNING: SYSTEM PURGE SAFETY DISENGAGED' : 'SYSTEM PURGE SAFETY RE-LOCKED');
-    });
-
-    btnPurge.addEventListener('click', () => {
-      playBlip(220, 'sawtooth', 0.3);
-      alert('// SYSTEM OVERDRIVE COMMENCED: ALL TELEMETRY RE-ROUTED');
-      logEvent('CRITICAL: PURGE PROTOCOL EXECUTED');
-    });
-
-    // Rotary Dial Controller
+    // Rotary Dial Interaction
     const dial = document.getElementById('main-dial');
-    const dialIndicator = document.getElementById('dial-indicator');
-    const dialReadout = document.getElementById('dial-readout');
+    const indicator = document.getElementById('dial-indicator');
+    const readout = document.getElementById('dial-readout');
     let isDragging = false;
     let angle = 0;
 
-    dial.addEventListener('mousedown', () => { isDragging = true; });
-    window.addEventListener('mouseup', () => { isDragging = false; });
+    dial.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      playBlip(440, 'triangle', 0.02);
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        logEvent(`ROTARY INDUCTOR LOCKED AT ${Math.round(angle)} DEG`);
+      }
+    });
+
     window.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       const rect = dial.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
       const rad = Math.atan2(e.clientY - cy, e.clientX - cx);
-      let deg = Math.round(rad * (180 / Math.PI)) + 90;
-      if (deg < 0) deg += 360;
-      angle = deg;
-      dialIndicator.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-      dialIndicator.style.transformOrigin = 'bottom center';
+      angle = (rad * (180 / Math.PI) + 90 + 360) % 360;
+      indicator.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+      indicator.style.transformOrigin = `bottom center`;
       const val = String(Math.round((angle / 360) * 999)).padStart(3, '0');
-      dialReadout.textContent = val;
-      playBlip(200 + (angle * 2), 'sine', 0.02);
+      readout.textContent = val;
+      if (Math.round(angle) % 15 === 0) playBlip(800 + angle * 2, 'square', 0.015);
+    });
+
+    // Safety Cover & Purge
+    const safety = document.getElementById('safety-cover');
+    const btnPurge = document.getElementById('btn-purge');
+    safety.addEventListener('click', () => {
+      safety.classList.toggle('open');
+      const armed = safety.classList.contains('open');
+      safety.textContent = armed ? '▼ SAFETY DISARMED · WEAPON READY ▼' : '▲ SAFETY COVER ARMED (CLICK TO DISARM) ▲';
+      btnPurge.disabled = !armed;
+      btnPurge.style.opacity = armed ? '1' : '0.4';
+      playBlip(armed ? 1040 : 330, 'square', 0.08);
+      logEvent(`SAFETY INTERLOCK: ${armed ? 'DISENGAGED' : 'ARMED'}`);
+    });
+
+    btnPurge.addEventListener('click', () => {
+      playBlip(220, 'sawtooth', 0.4);
+      document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+      setTimeout(() => document.body.style.filter = '', 150);
+      logEvent('CRITICAL: PURGE INITIATED · BUFFER WIPED');
+    });
+
+    // Switches
+    document.querySelectorAll('.switch-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        playBlip(600, 'square', 0.02);
+        logEvent(`SAFETY COUPLING STATE: ${e.target.dataset.state}`);
+      });
     });
   </script>
 </body>
