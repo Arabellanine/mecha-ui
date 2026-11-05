@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Universal Tactical Status Module Demo</title>
+  <link rel="stylesheet" href="mecha-ui.css">
+  <link rel="stylesheet" href="snippets/mecha-status.css">
+  <style>
+    body {
+      background: #07090e;
+      color: #94a3b8;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      align-items: flex-start;
+    }
+    h1 {
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    .demo-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>// MECHA-UI UNIVERSAL TACTICAL STATUS MODULE</h1>
+    <p>Standardized swappable tactical state indicators for Behance showcase boards and web apps.</p>
+  </div>
+
+  <div class="demo-group">
+    <div class="mecha-status-module status-ongoing">// STATUS: ONGOING ACTIVE</div>
+    <div class="mecha-status-module status-wip">// STATUS: UNDER CONSTRUCTION [WIP]</div>
+    <div class="mecha-status-module status-deployed">// STATUS: DEPLOYED v1.0.0 [LIVE]</div>
+    <div class="mecha-status-module status-critical">// STATUS: CRITICAL INTERRUPT</div>
+  </div>
+</body>
+</html>
