@@ -10,6 +10,7 @@ Built by **Arabella** ([@Arabellanine](https://github.com/Arabellanine)).
 
 - **Live Overview & Documentation:** [arabellanine.github.io/mecha-ui](https://arabellanine.github.io/mecha-ui/)
 - **Components Playground:** [arabellanine.github.io/mecha-ui/components.html](https://arabellanine.github.io/mecha-ui/components.html)
+- **Rotary & Tactile Hardware Controls:** [arabellanine.github.io/mecha-ui/controls.html](https://arabellanine.github.io/mecha-ui/controls.html)
 - **Token Inspector & Typography Scale:** [arabellanine.github.io/mecha-ui/tokens.html](https://arabellanine.github.io/mecha-ui/tokens.html)
 - **Tactical Status Modules:** [arabellanine.github.io/mecha-ui/status.html](https://arabellanine.github.io/mecha-ui/status.html)
 - **Behance Showcase:** [MECHA-UI on Behance](https://www.behance.net/gallery/258048339/MECHA-UI-Tactical-Cybernetic-Design-System)
@@ -20,6 +21,7 @@ Built by **Arabella** ([@Arabellanine](https://github.com/Arabellanine)).
 
 - **Zero Runtime Dependencies:** Pure semantic HTML5, pure CSS variables, zero framework bloat.
 - **Avionics Typography Scale:** Calibrated hierarchy leveraging `Space Grotesk` and `JetBrains Mono`.
+- **Rotary Dials & Bistable Rockers:** Kinetic rotational dial mechanics and tactile bistable switches with zero dependencies.
 - **Dynamic Web Audio Synthesizer:** Tactile clicks, frequency sweeps, and acoustic feedback synthesized natively via Web Audio API.
 - **CRT & Telemetry Effects:** Real-time CRT scanlines, flicker shaders, and multi-segment telemetry readouts.
 - **Universal Status Modules:** Swappable chamfered indicators (`// ONGOING`, `// UNDER CONSTRUCTION`, `// DEPLOYED v1.0`).

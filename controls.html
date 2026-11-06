@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Tactical Rotary & Hardware Controls</title>
+  <link rel="stylesheet" href="mecha-ui.css">
+  <link rel="stylesheet" href="snippets/mecha-status.css">
+  <style>
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.85;
+    }
+
+    .board-frame {
+      width: 1200px;
+      background: var(--bg-panel);
+      border: 2px solid var(--border-bright);
+      padding: 40px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--border-bright);
+      padding-bottom: 20px;
+      margin-bottom: 32px;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .control-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dim);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .dial-cluster {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 16px 0;
+    }
+
+    .dial-meta {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .dial-meta .value {
+      color: var(--tactical-amber);
+      font-weight: 700;
+    }
+
+    .switch-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 0;
+    }
+
+    .rocker-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-dim);
+    }
+
+    .nav-strip {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .nav-strip a {
+      color: var(--telemetry-cyan);
+      text-decoration: none;
+    }
+    .nav-strip a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+
+  <div class="board-frame">
+    <header class="header-row">
+      <div>
+        <div style="font-size:10px; color:var(--alert-crimson); font-weight:800; letter-spacing:0.15em; text-transform:uppercase;">
+          SPEC 3.1 // KINETIC ACTUATION SYSTEMS
+        </div>
+        <h1 style="font-size:24px; color:var(--text-bright); margin-top:4px;">TACTILE ROTARY & SWITCH CONTROLS</h1>
+      </div>
+      <div style="text-align:right; font-size:11px;">
+        <div style="color:var(--tactical-amber); font-weight:700;">MECHA-UI v0.1.0</div>
+        <div>ZERO BLOAT // CSS KINETICS</div>
+      </div>
+    </header>
+
+    <div class="controls-grid">
+
+      <!-- Rotary Dial 1 -->
+      <div class="control-card">
+        <div class="card-label">
+          <span>// DIAL 01 · RADIAL BUS</span>
+          <span style="color:var(--telemetry-cyan);">FREQ CALIBRATION</span>
+        </div>
+        <div class="dial-cluster">
+          <div>
+            <div class="mecha-rotary-dial" id="dial-freq" data-deg="45">
+              <div class="mecha-rotary-pointer" style="transform: rotate(45deg);"></div>
+              <div class="mecha-rotary-center">45°</div>
+            </div>
+            <div class="dial-meta">HARMONIC: <span class="value" id="val-freq">142.5 MHz</span></div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--text-muted);">
+          Drag or click dial perimeter to articulate rotation angle. Real-time angular snapping available.
+        </p>
+      </div>
+
+      <!-- Rotary Dial 2 -->
+      <div class="control-card">
+        <div class="card-label">
+          <span>// DIAL 02 · PLASMA FLUX</span>
+          <span style="color:var(--alert-crimson);">THRUST GAIN</span>
+        </div>
+        <div class="dial-cluster">
+          <div>
+            <div class="mecha-rotary-dial" id="dial-thrust" data-deg="135">
+              <div class="mecha-rotary-pointer" style="transform: rotate(135deg); background:var(--alert-crimson); box-shadow:0 0 8px var(--alert-crimson-glow);"></div>
+              <div class="mecha-rotary-center">135°</div>
+            </div>
+            <div class="dial-meta">FLUX: <span class="value" style="color:var(--alert-crimson);" id="val-thrust">88.4%</span></div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--text-muted);">
+          Calibrated with audio feedback click synthesis via native Web Audio API oscillators.
+        </p>
+      </div>
+
+      <!-- Mechanical Rockers -->
+      <div class="control-card">
+        <div class="card-label">
+          <span>// ACTUATORS · HEAVY ROCKERS</span>
+          <span style="color:var(--system-emerald);">POWER BUS</span>
+        </div>
+
+        <div class="switch-stack">
+          <div class="rocker-row">
+            <span>AUX TURBINE</span>
+            <div class="mecha-switch-rocker active" onclick="toggleRocker(this)">
+              <div class="mecha-switch-lever"></div>
+              <span>ONLINE</span>
+            </div>
+          </div>
+
+          <div class="rocker-row">
+            <span>SHIELD OVERDRIVE</span>
+            <div class="mecha-switch-rocker" onclick="toggleRocker(this)">
+              <div class="mecha-switch-lever"></div>
+              <span>OFFLINE</span>
+            </div>
+          </div>
+
+          <div class="rocker-row">
+            <span>TARGETING MATRIX</span>
+            <div class="mecha-switch-rocker active" onclick="toggleRocker(this)">
+              <div class="mecha-switch-lever"></div>
+              <span>ONLINE</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:11px; color:var(--text-muted);">
+          Bistable rocker switches utilizing mechanical inset shadows and 2-phase CSS transition states.
+        </p>
+      </div>
+
+    </div>
+
+    <footer class="nav-strip">
+      <div>MECHA-UI DESIGN SYSTEM // ZERO RUNTIME DEPENDENCIES</div>
+      <div>
+        <a href="index.html">← INDEX</a> &nbsp;|&nbsp; 
+        <a href="components.html">COMPONENTS</a> &nbsp;|&nbsp; 
+        <a href="tokens.html">TOKENS</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Audio synthesizer for click feedback
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClickSound(freq = 420) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function toggleRocker(el) {
+      el.classList.toggle('active');
+      const label = el.querySelector('span:last-child');
+      if (el.classList.contains('active')) {
+        label.textContent = 'ONLINE';
+        playClickSound(580);
+      } else {
+        label.textContent = 'OFFLINE';
+        playClickSound(320);
+      }
+    }
+
+    // Rotary Dial Interaction
+    function setupDial(dialId, metaId, baseVal, unit) {
+      const dial = document.getElementById(dialId);
+      const pointer = dial.querySelector('.mecha-rotary-pointer');
+      const center = dial.querySelector('.mecha-rotary-center');
+      const meta = document.getElementById(metaId);
+
+      let isDragging = false;
+
+      function updateRotation(e) {
+        const rect = dial.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const rad = Math.atan2(clientY - cy, clientX - cx);
+        let deg = Math.round(rad * (180 / Math.PI)) + 90;
+        if (deg < 0) deg += 360;
+
+        pointer.style.transform = `rotate(${deg}deg)`;
+        center.textContent = `${deg}°`;
+        dial.setAttribute('data-deg', deg);
+
+        const val = (deg / 360 * baseVal).toFixed(1);
+        meta.textContent = `${val} ${unit}`;
+        playClickSound(200 + deg);
+      }
+
+      dial.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        updateRotation(e);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) updateRotation(e);
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDragging) isDragging = false;
+      });
+    }
+
+    setupDial('dial-freq', 'val-freq', 300, 'MHz');
+    setupDial('dial-thrust', 'val-thrust', 100, '%');
+  </script>
+</body>
+</html>

@@ -6,181 +6,135 @@
 
 :root {
   /* --- VOID & SURFACE BASE TOKENS --- */
-  --mecha-void: #07090e;
-  --mecha-surface-base: #0b1017;
-  --mecha-surface-card: #101622;
-  --mecha-surface-elevated: #161e2e;
-  
-  /* --- BORDER MATRIX TOKENS --- */
-  --mecha-border-dim: #1c2638;
-  --mecha-border-bright: #2a3a54;
-  --mecha-border-highlight: #48658f;
-  
-  /* --- COLOR PRIMITIVES (WCAG AAA HIGHEST CONTRAST) --- */
-  --mecha-amber: #f59e0b;
-  --mecha-amber-glow: rgba(245, 158, 11, 0.25);
-  
-  --mecha-crimson: #ef4444;
-  --mecha-crimson-glow: rgba(239, 68, 68, 0.25);
-  
-  --mecha-cyan: #06b6d4;
-  --mecha-cyan-glow: rgba(6, 182, 212, 0.25);
-  
-  --mecha-emerald: #10b981;
-  --mecha-emerald-glow: rgba(16, 185, 129, 0.25);
-  
-  /* --- TYPOGRAPHY & TEXT TOKENS --- */
-  --mecha-text-muted: #64748b;
-  --mecha-text-medium: #94a3b8;
-  --mecha-text-bright: #f8fafc;
-  --mecha-font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
-  --mecha-font-display: 'Space Grotesk', system-ui, sans-serif;
-  
-  /* --- TACTICAL CHAMFERS --- */
-  --mecha-clip-chamfer: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-  --mecha-clip-tab: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+  --bg-void: #06080c;
+  --bg-panel: #0b0f17;
+  --bg-card: #101622;
+  --bg-inset: #070a0f;
+
+  /* --- BORDER & GRID MATRIX --- */
+  --border-dim: #1d2736;
+  --border-bright: #31425a;
+  --border-highlight: #4d668b;
+
+  /* --- HIGH-CONTRAST TYPOGRAPHY --- */
+  --text-muted: #5e6f85;
+  --text-main: #8ea0b8;
+  --text-bright: #f1f5f9;
+
+  /* --- TACTICAL AVIONICS ACCENTS --- */
+  --tactical-amber: #f59e0b;
+  --tactical-amber-glow: rgba(245, 158, 11, 0.28);
+  --alert-crimson: #ef4444;
+  --alert-crimson-glow: rgba(239, 68, 68, 0.32);
+  --system-emerald: #10b981;
+  --system-emerald-glow: rgba(16, 185, 129, 0.28);
+  --telemetry-cyan: #06b6d4;
+  --telemetry-cyan-glow: rgba(6, 182, 212, 0.28);
+
+  /* --- MONOSPACE CALIBRATION --- */
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
 /* ==========================================================================
-   ATOMIC COMPONENT STYLES
+   ROTARY DIAL & MECHANICAL SWITCH PRIMITIVES
    ========================================================================== */
 
-/* Panels with Corner Brackets */
-.mecha-panel {
-  background: var(--mecha-surface-base);
-  border: 1px solid var(--mecha-border-dim);
-  padding: 24px;
-  position: relative;
-  font-family: var(--mecha-font-mono);
-}
-.mecha-panel::before {
-  content: "";
-  position: absolute;
-  top: -1px; left: -1px;
-  width: 10px; height: 10px;
-  border-top: 2px solid var(--mecha-amber);
-  border-left: 2px solid var(--mecha-amber);
-}
-.mecha-panel::after {
-  content: "";
-  position: absolute;
-  bottom: -1px; right: -1px;
-  width: 10px; height: 10px;
-  border-bottom: 2px solid var(--mecha-cyan);
-  border-right: 2px solid var(--mecha-cyan);
-}
-
-/* Tactical Buttons */
-.mecha-btn {
-  background: var(--mecha-surface-card);
-  border: 1px solid var(--mecha-border-bright);
-  color: var(--mecha-text-bright);
-  font-family: var(--mecha-font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  padding: 8px 16px;
-  cursor: pointer;
+/* Tactile Mechanical Rocker Switch */
+.mecha-switch-rocker {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.15s ease;
-  position: relative;
-}
-.mecha-btn:hover {
-  background: var(--mecha-border-bright);
-  color: #fff;
-}
-.mecha-btn:active {
-  transform: translateY(1px);
-}
-
-.mecha-btn-amber {
-  border-color: var(--mecha-amber);
-  color: var(--mecha-amber);
-}
-.mecha-btn-amber:hover {
-  background: var(--mecha-amber);
-  color: #000;
-  box-shadow: 0 0 16px var(--mecha-amber-glow);
-}
-
-.mecha-btn-crimson {
-  border-color: var(--mecha-crimson);
-  color: var(--mecha-crimson);
-}
-.mecha-btn-crimson:hover {
-  background: var(--mecha-crimson);
-  color: #000;
-  box-shadow: 0 0 16px var(--mecha-crimson-glow);
-}
-
-.mecha-btn-cyan {
-  border-color: var(--mecha-cyan);
-  color: var(--mecha-cyan);
-}
-.mecha-btn-cyan:hover {
-  background: var(--mecha-cyan);
-  color: #000;
-  box-shadow: 0 0 16px var(--mecha-cyan-glow);
-}
-
-/* Guarded Safety Interlock Button */
-.mecha-guarded-box {
-  border: 1px dashed var(--mecha-crimson);
-  padding: 16px;
-  background: rgba(239, 68, 68, 0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.mecha-safety-cover {
-  background: repeating-linear-gradient(45deg, #181111, #181111 10px, #361717 10px, #361717 20px);
-  border: 1px solid var(--mecha-crimson);
-  padding: 8px 12px;
-  text-align: center;
-  font-size: 10px;
-  color: var(--mecha-crimson);
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-bright);
+  padding: 4px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
-}
-.mecha-safety-cover.open {
-  background: #091a13;
-  border-color: var(--mecha-emerald);
-  color: var(--mecha-emerald);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  gap: 6px;
+  transition: border-color 0.15s ease;
 }
 
-/* Telemetry Segmented Progress Track */
-.mecha-meter-track {
-  background: var(--mecha-surface-card);
-  border: 1px solid var(--mecha-border-dim);
-  height: 14px;
+.mecha-switch-rocker:hover {
+  border-color: var(--tactical-amber);
+}
+
+.mecha-switch-lever {
+  width: 28px;
+  height: 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mecha-switch-lever::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 10px;
+  height: 12px;
+  background: var(--text-muted);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+.mecha-switch-rocker.active .mecha-switch-lever {
+  border-color: var(--tactical-amber);
+  box-shadow: 0 0 8px var(--tactical-amber-glow);
+}
+
+.mecha-switch-rocker.active .mecha-switch-lever::after {
+  transform: translateX(12px);
+  background: var(--tactical-amber);
+  box-shadow: 0 0 6px var(--tactical-amber-glow);
+}
+
+/* Rotary Dial Component */
+.mecha-rotary-dial {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #1e293b, var(--bg-inset) 70%);
+  border: 2px solid var(--border-bright);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1), 0 8px 16px rgba(0, 0, 0, 0.6);
+  position: relative;
   display: flex;
-  gap: 2px;
-  padding: 2px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.mecha-meter-block {
-  flex: 1;
-  height: 100%;
-  background: var(--mecha-border-dim);
-  transition: background 0.2s ease;
-}
-.mecha-meter-block.active-amber { background: var(--mecha-amber); box-shadow: 0 0 8px var(--mecha-amber-glow); }
-.mecha-meter-block.active-crimson { background: var(--mecha-crimson); box-shadow: 0 0 8px var(--mecha-crimson-glow); }
-.mecha-meter-block.active-cyan { background: var(--mecha-cyan); box-shadow: 0 0 8px var(--mecha-cyan-glow); }
-.mecha-meter-block.active-emerald { background: var(--mecha-emerald); box-shadow: 0 0 8px var(--mecha-emerald-glow); }
 
-/* CRT Scanline Shader Overlay */
-.mecha-crt-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-  background-size: 100% 4px, 6px 100%;
-  opacity: 0.75;
+.mecha-rotary-dial:hover {
+  border-color: var(--telemetry-cyan);
+  box-shadow: 0 0 12px var(--telemetry-cyan-glow);
+}
+
+.mecha-rotary-pointer {
+  position: absolute;
+  top: 6px;
+  width: 4px;
+  height: 16px;
+  background: var(--tactical-amber);
+  box-shadow: 0 0 8px var(--tactical-amber-glow);
+  transform-origin: center 42px;
+  transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.mecha-rotary-center {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-bright);
 }
