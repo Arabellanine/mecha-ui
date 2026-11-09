@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Telemetry Wave Generator & Arc Gauges</title>
+  <link rel="stylesheet" href="mecha-ui.css">
+  <link rel="stylesheet" href="snippets/mecha-status.css">
+  <style>
+    body {
+      background-color: var(--bg-void);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 4px, 6px 100%;
+      opacity: 0.85;
+    }
+
+    .board-frame {
+      width: 1240px;
+      background: var(--bg-panel);
+      border: 2px solid var(--border-bright);
+      padding: 40px;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 2px solid var(--border-bright);
+      padding-bottom: 20px;
+      margin-bottom: 32px;
+    }
+
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 980px) {
+      .telemetry-grid {
+        grid-template-columns: 1fr;
+      }
+      .board-frame {
+        width: 100%;
+        padding: 20px;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-card, #101622);
+      border: 1px solid var(--border-dim);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted, #8ea0b8);
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .oscilloscope-screen {
+      position: relative;
+      background: #03070b;
+      border: 1px solid var(--border-bright);
+      padding: 8px;
+      box-shadow: inset 0 0 24px rgba(0,0,0,0.9);
+    }
+
+    canvas#osc-canvas {
+      display: block;
+      width: 100%;
+      height: 220px;
+      background: #04080e;
+    }
+
+    .controls-toolbar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: var(--bg-inset, #0e141f);
+      border: 1px solid var(--border-dim);
+      padding: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .controls-toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .param-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .param-group label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-muted, #8ea0b8);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .param-group label .val-num {
+      color: var(--telemetry-cyan);
+      font-weight: 700;
+    }
+
+    .tactical-btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tactical-btn {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    .tactical-btn:hover {
+      border-color: var(--telemetry-cyan);
+      color: var(--text-bright);
+    }
+
+    .tactical-btn.active {
+      background: var(--telemetry-cyan);
+      color: #03070b;
+      border-color: var(--telemetry-cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    .gauges-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    @media (max-width: 600px) {
+      .gauges-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .gauge-wrapper {
+      background: var(--bg-inset, #0e141f);
+      border: 1px solid var(--border-dim);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gauge-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text-muted, #8ea0b8);
+    }
+
+    .gauge-svg {
+      width: 220px;
+      height: 125px;
+      display: block;
+    }
+
+    .gauge-readout {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted, #8ea0b8);
+    }
+
+    .gauge-readout .primary-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: 0.05em;
+    }
+
+    .gauge-slider {
+      width: 100%;
+      accent-color: var(--tactical-amber);
+      cursor: pointer;
+    }
+
+    .nav-strip {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+
+    .nav-strip a {
+      color: var(--telemetry-cyan);
+      text-decoration: none;
+    }
+    .nav-strip a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="crt-overlay"></div>
+
+  <div class="board-frame">
+    <header class="header-row">
+      <div>
+        <div style="font-size:10px; color:var(--telemetry-cyan); font-weight:800; letter-spacing:0.18em; text-transform:uppercase;">
+          SPEC 3.2 // AVIONICS TELEMETRY & FLUID GAUGES
+        </div>
+        <h1 style="font-size:24px; color:var(--text-bright); margin-top:4px;">OSCILLOSCOPE & SEMICIRCULAR ARC GAUGES</h1>
+      </div>
+      <div style="text-align:right; font-size:11px;">
+        <div style="color:var(--telemetry-cyan); font-weight:700;">MECHA-UI v0.1.0</div>
+        <div>ZERO RUNTIME // HARDWARE SYNTH</div>
+      </div>
+    </header>
+
+    <div class="telemetry-grid">
+
+      <!-- LEFT: Telemetry Waveform Generator / Oscilloscope -->
+      <div class="panel-card">
+        <div class="card-label">
+          <span>// OSC-01 · TELEMETRY WAVEFORM HARMONIC BUS</span>
+          <span id="osc-status" style="color:var(--system-emerald);">SIGNAL LOCKED</span>
+        </div>
+
+        <div class="oscilloscope-screen">
+          <canvas id="osc-canvas" width="600" height="220"></canvas>
+        </div>
+
+        <div class="controls-toolbar">
+          <div class="param-group">
+            <label>FREQ <span class="val-num" id="val-freq-text">220 Hz</span></label>
+            <input type="range" class="gauge-slider" id="slider-freq" min="20" max="880" value="220" style="accent-color:var(--telemetry-cyan);">
+          </div>
+          <div class="param-group">
+            <label>AMP <span class="val-num" id="val-amp-text">75%</span></label>
+            <input type="range" class="gauge-slider" id="slider-amp" min="10" max="100" value="75" style="accent-color:var(--telemetry-cyan);">
+          </div>
+          <div class="param-group">
+            <label>DECAY <span class="val-num" id="val-decay-text">0.18</span></label>
+            <input type="range" class="gauge-slider" id="slider-decay" min="5" max="40" value="18" style="accent-color:var(--telemetry-cyan);">
+          </div>
+          <div class="param-group">
+            <label>BUS SYNTH</label>
+            <button class="tactical-btn" id="btn-audio" onclick="toggleAudioSynth()">AUDIO: MUTED</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div class="tactical-btn-group">
+            <button class="tactical-btn active" onclick="setWaveform('sine', this)">SINE</button>
+            <button class="tactical-btn" onclick="setWaveform('square', this)">SQR</button>
+            <button class="tactical-btn" onclick="setWaveform('sawtooth', this)">SAW</button>
+            <button class="tactical-btn" onclick="setWaveform('noise', this)">NOISE</button>
+          </div>
+          <button class="tactical-btn" id="btn-pause" onclick="toggleOscPause()">FREEZE SWEEP</button>
+        </div>
+
+        <p style="font-size:11px; color:var(--text-muted, #8ea0b8); line-height:1.4;">
+          Phosphor-decay vector waveform synthesized in real time via canvas context, paired with Web Audio API tone synthesis for auditory telemetry feedback.
+        </p>
+      </div>
+
+      <!-- RIGHT: Analog Semicircular Arc Gauges -->
+      <div class="panel-card">
+        <div class="card-label">
+          <span>// ARC-02 · ANALOG HYDRAULIC & FLUX GAUGES</span>
+          <span style="color:var(--tactical-amber);">DUAL BUS MONITOR</span>
+        </div>
+
+        <div class="gauges-container">
+          
+          <!-- Gauge 1: PSI Core Pressure -->
+          <div class="gauge-wrapper">
+            <div class="gauge-title">// PRIMARY HYDRAULIC [PSI]</div>
+            <svg class="gauge-svg" viewBox="0 0 200 115" id="svg-gauge-psi" role="img" aria-label="Hydraulic Pressure Gauge">
+              <!-- Background Arc -->
+              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-dim)" stroke-width="12" stroke-linecap="butt" />
+              <!-- Active Colored Arc -->
+              <path id="arc-psi-active" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--tactical-amber)" stroke-width="12" stroke-linecap="butt" stroke-dasharray="251.32" stroke-dashoffset="80" style="transition: stroke-dashoffset 0.25s ease;" />
+              <!-- Radial Tick Marks -->
+              <line x1="20" y1="100" x2="32" y2="100" stroke="var(--border-bright)" stroke-width="2" />
+              <line x1="100" y1="20" x2="100" y2="32" stroke="var(--border-bright)" stroke-width="2" />
+              <line x1="180" y1="100" x2="168" y2="100" stroke="var(--border-bright)" stroke-width="2" />
+              <!-- Dial Needle / Pointer -->
+              <g id="needle-psi" style="transform-origin: 100px 100px; transform: rotate(-30deg); transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);">
+                <line x1="100" y1="100" x2="100" y2="32" stroke="var(--alert-crimson)" stroke-width="3" stroke-linecap="round" />
+                <circle cx="100" cy="100" r="7" fill="var(--border-bright)" stroke="var(--alert-crimson)" stroke-width="2" />
+              </g>
+              <text x="100" y="85" text-anchor="middle" font-family="var(--font-mono)" font-size="10" fill="var(--text-muted, #8ea0b8)">0 .. 1500</text>
+            </svg>
+            <div class="gauge-readout">
+              <span class="primary-num" id="val-psi-num" style="color:var(--tactical-amber);">1020</span> <span style="font-size:10px; color:var(--text-muted, #8ea0b8);">PSI</span>
+            </div>
+            <input type="range" class="gauge-slider" id="slider-psi" min="0" max="1500" value="1020" oninput="updatePsiGauge(this.value)" aria-label="Adjust Hydraulic PSI">
+          </div>
+
+          <!-- Gauge 2: Radians / Thermal Flux -->
+          <div class="gauge-wrapper">
+            <div class="gauge-title">// THERMAL FLUX [°C]</div>
+            <svg class="gauge-svg" viewBox="0 0 200 115" id="svg-gauge-temp" role="img" aria-label="Thermal Flux Gauge">
+              <!-- Background Arc -->
+              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-dim)" stroke-width="12" stroke-linecap="butt" />
+              <!-- Active Colored Arc -->
+              <path id="arc-temp-active" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--telemetry-cyan)" stroke-width="12" stroke-linecap="butt" stroke-dasharray="251.32" stroke-dashoffset="120" style="transition: stroke-dashoffset 0.25s ease;" />
+              <!-- Dial Needle / Pointer -->
+              <g id="needle-temp" style="transform-origin: 100px 100px; transform: rotate(10deg); transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);">
+                <line x1="100" y1="100" x2="100" y2="32" stroke="var(--telemetry-cyan)" stroke-width="3" stroke-linecap="round" />
+                <circle cx="100" cy="100" r="7" fill="var(--border-bright)" stroke="var(--telemetry-cyan)" stroke-width="2" />
+              </g>
+              <text x="100" y="85" text-anchor="middle" font-family="var(--font-mono)" font-size="10" fill="var(--text-muted, #8ea0b8)">-40 .. +120</text>
+            </svg>
+            <div class="gauge-readout">
+              <span class="primary-num" id="val-temp-num" style="color:var(--telemetry-cyan);">64.5</span> <span style="font-size:10px; color:var(--text-muted, #8ea0b8);">°C</span>
+            </div>
+            <input type="range" class="gauge-slider" id="slider-temp" min="-40" max="120" value="64" style="accent-color:var(--telemetry-cyan);" oninput="updateTempGauge(this.value)" aria-label="Adjust Thermal Flux">
+          </div>
+
+        </div>
+
+        <div style="background:var(--bg-inset, #0e141f); border:1px solid var(--border-dim); padding:12px; font-size:11px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span>AUTO-CALIBRATION SWEEP:</span>
+          <div class="tactical-btn-group">
+            <button class="tactical-btn" onclick="triggerSweep()">TRIGGER SWEEP</button>
+            <button class="tactical-btn" onclick="randomizeGauges()">STOCHASTIC</button>
+          </div>
+        </div>
+
+        <p style="font-size:11px; color:var(--text-muted, #8ea0b8); line-height:1.4;">
+          Semicircular SVG stroke geometry using circumference ratio computation (C=πr ≈ 251.32px) and angular matrix rotations from -90° to +90°.
+        </p>
+      </div>
+
+    </div>
+
+    <footer class="nav-strip">
+      <div>MECHA-UI DESIGN SYSTEM // RETRO-FUTURISTIC AVIONICS SPEC</div>
+      <div>
+        <a href="index.html">← INDEX</a> &nbsp;|&nbsp; 
+        <a href="controls.html">TACTILE CONTROLS</a> &nbsp;|&nbsp; 
+        <a href="telemetry.html">TELEMETRY</a> &nbsp;|&nbsp; 
+        <a href="components.html">COMPONENTS</a> &nbsp;|&nbsp; 
+        <a href="tokens.html">TOKENS</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       OSCILLOSCOPE & WEB AUDIO GENERATOR
+       ========================================================================== */
+    const canvas = document.getElementById('osc-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = canvas.offsetWidth;
+    let height = canvas.height = canvas.offsetHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = canvas.offsetWidth;
+      height = canvas.height = canvas.offsetHeight;
+    });
+
+    let currentWaveform = 'sine';
+    let isPaused = false;
+    let phase = 0;
+    let decayAlpha = 0.18;
+    let audioEnabled = false;
+    let audioCtx = null;
+    let oscNode = null;
+    let gainNode = null;
+
+    const sliderFreq = document.getElementById('slider-freq');
+    const sliderAmp = document.getElementById('slider-amp');
+    const sliderDecay = document.getElementById('slider-decay');
+
+    sliderFreq.addEventListener('input', (e) => {
+      document.getElementById('val-freq-text').textContent = `${e.target.value} Hz`;
+      if (oscNode && audioEnabled) {
+        oscNode.frequency.setTargetAtTime(parseFloat(e.target.value), audioCtx.currentTime, 0.03);
+      }
+    });
+
+    sliderAmp.addEventListener('input', (e) => {
+      document.getElementById('val-amp-text').textContent = `${e.target.value}%`;
+    });
+
+    sliderDecay.addEventListener('input', (e) => {
+      decayAlpha = parseFloat(e.target.value) / 100;
+      document.getElementById('val-decay-text').textContent = decayAlpha.toFixed(2);
+    });
+
+    function setWaveform(type, btn) {
+      currentWaveform = type;
+      document.querySelectorAll('.tactical-btn-group .tactical-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (oscNode && audioEnabled) {
+        if (type === 'noise') {
+          oscNode.type = 'sawtooth';
+        } else {
+          oscNode.type = type;
+        }
+      }
+    }
+
+    function toggleOscPause() {
+      isPaused = !isPaused;
+      const btn = document.getElementById('btn-pause');
+      const status = document.getElementById('osc-status');
+      if (isPaused) {
+        btn.textContent = 'RESUME SWEEP';
+        btn.classList.add('active');
+        status.textContent = 'SWEEP FROZEN';
+        status.style.color = 'var(--tactical-amber)';
+      } else {
+        btn.textContent = 'FREEZE SWEEP';
+        btn.classList.remove('active');
+        status.textContent = 'SIGNAL LOCKED';
+        status.style.color = 'var(--system-emerald)';
+      }
+    }
+
+    function toggleAudioSynth() {
+      const btn = document.getElementById('btn-audio');
+      if (!audioEnabled) {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          oscNode = audioCtx.createOscillator();
+          gainNode = audioCtx.createGain();
+          oscNode.type = currentWaveform === 'noise' ? 'sawtooth' : currentWaveform;
+          oscNode.frequency.setValueAtTime(parseFloat(sliderFreq.value), audioCtx.currentTime);
+          gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
+          oscNode.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          oscNode.start();
+        } else if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        gainNode.gain.setTargetAtTime(0.04, audioCtx.currentTime, 0.05);
+        audioEnabled = true;
+        btn.textContent = 'AUDIO: ONLINE';
+        btn.classList.add('active');
+      } else {
+        if (gainNode) {
+          gainNode.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
+        }
+        audioEnabled = false;
+        btn.textContent = 'AUDIO: MUTED';
+        btn.classList.remove('active');
+      }
+    }
+
+    function renderOscilloscope() {
+      requestAnimationFrame(renderOscilloscope);
+      if (isPaused) return;
+
+      ctx.fillStyle = `rgba(4, 8, 14, ${decayAlpha})`;
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(49, 66, 90, 0.25)';
+      const stepX = width / 10;
+      const stepY = height / 6;
+
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += stepX) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y <= height; y += stepY) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.35)';
+      ctx.moveTo(0, height / 2);
+      ctx.lineTo(width, height / 2);
+      ctx.stroke();
+
+      const freq = parseFloat(sliderFreq.value);
+      const amp = (parseFloat(sliderAmp.value) / 100) * (height / 2 - 16);
+      const cycles = (freq / 40);
+
+      ctx.beginPath();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = currentWaveform === 'noise' ? '#ef4444' : '#06b6d4';
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = currentWaveform === 'noise' ? 'rgba(239, 68, 68, 0.6)' : 'rgba(6, 182, 212, 0.6)';
+
+      for (let x = 0; x < width; x++) {
+        const t = (x / width) * cycles * 2 * Math.PI + phase;
+        let yNorm = 0;
+
+        if (currentWaveform === 'sine') {
+          yNorm = Math.sin(t);
+        } else if (currentWaveform === 'square') {
+          yNorm = Math.sin(t) >= 0 ? 0.85 : -0.85;
+        } else if (currentWaveform === 'sawtooth') {
+          yNorm = (2 * ((t / (2 * Math.PI)) % 1)) - 1;
+        } else if (currentWaveform === 'noise') {
+          yNorm = (Math.random() * 2 - 1) * 0.9;
+        }
+
+        const y = height / 2 - (yNorm * amp);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      phase += 0.08;
+    }
+    renderOscilloscope();
+
+    /* ==========================================================================
+       SEMICIRCULAR ARC GAUGES INTERACTION
+       ========================================================================== */
+    const ARC_CIRCUMFERENCE = 251.32;
+
+    function updatePsiGauge(val) {
+      const min = 0;
+      const max = 1500;
+      const norm = Math.max(0, Math.min(1, (val - min) / (max - min)));
+      
+      const offset = ARC_CIRCUMFERENCE * (1 - norm);
+      document.getElementById('arc-psi-active').style.strokeDashoffset = offset;
+
+      const deg = -90 + (norm * 180);
+      document.getElementById('needle-psi').style.transform = `rotate(${deg}deg)`;
+      document.getElementById('val-psi-num').textContent = Math.round(val);
+    }
+
+    function updateTempGauge(val) {
+      const min = -40;
+      const max = 120;
+      const norm = Math.max(0, Math.min(1, (val - min) / (max - min)));
+
+      const offset = ARC_CIRCUMFERENCE * (1 - norm);
+      const arc = document.getElementById('arc-temp-active');
+      arc.style.strokeDashoffset = offset;
+
+      if (val > 95) {
+        arc.style.stroke = 'var(--alert-crimson)';
+      } else if (val > 75) {
+        arc.style.stroke = 'var(--tactical-amber)';
+      } else {
+        arc.style.stroke = 'var(--telemetry-cyan)';
+      }
+
+      const deg = -90 + (norm * 180);
+      document.getElementById('needle-temp').style.transform = `rotate(${deg}deg)`;
+      document.getElementById('val-temp-num').textContent = parseFloat(val).toFixed(1);
+    }
+
+    function triggerSweep() {
+      let step = 0;
+      const interval = setInterval(() => {
+        step += 0.05;
+        const sweepVal = (Math.sin(step) + 1) / 2;
+        const psi = sweepVal * 1500;
+        const temp = -40 + sweepVal * 160;
+        document.getElementById('slider-psi').value = psi;
+        document.getElementById('slider-temp').value = temp;
+        updatePsiGauge(psi);
+        updateTempGauge(temp);
+        if (step > Math.PI * 2) clearInterval(interval);
+      }, 30);
+    }
+
+    function randomizeGauges() {
+      const psi = Math.random() * 1500;
+      const temp = -40 + Math.random() * 160;
+      document.getElementById('slider-psi').value = psi;
+      document.getElementById('slider-temp').value = temp;
+      updatePsiGauge(psi);
+      updateTempGauge(temp);
+    }
+
+    updatePsiGauge(document.getElementById('slider-psi').value);
+    updateTempGauge(document.getElementById('slider-temp').value);
+  </script>
+</body>
+</html>

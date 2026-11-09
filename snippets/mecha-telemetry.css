@@ -1,0 +1,83 @@
+/* ============================================================================
+   MECHA-UI  ·  MODULE : ANALOG ARC GAUGE & OSCILLOSCOPE EXTENSION
+   Zero-dependency. Semicircular SVG gauges & Canvas Telemetry Oscilloscope.
+   ============================================================================ */
+
+.mecha-arc-gauge { display: flex; flex-direction: column; padding: 16px 16px 14px; gap: 10px; background: var(--bg-panel); border: 1px solid var(--border-bright); }
+.mecha-arc-gauge .gauge-stage { position: relative; width: 100%; aspect-ratio: 300 / 190; }
+.mecha-arc-gauge svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+.mecha-arc-gauge .arc-track     { fill: none; stroke: var(--bg-trough, #070a10); stroke-width: 16; }
+.mecha-arc-gauge .arc-track-edge{ fill: none; stroke: var(--border-bright); stroke-width: 1; }
+.mecha-arc-gauge .arc-active {
+  fill: none;
+  stroke: var(--telemetry-cyan);
+  stroke-width: 16;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 6px var(--glow-cyan, rgba(6, 182, 212, 0.4)));
+  transition: stroke-dashoffset .12s cubic-bezier(.2,.7,.3,1), stroke .2s linear;
+}
+.mecha-arc-gauge .tick-major { stroke: var(--text-main); stroke-width: 2; }
+.mecha-arc-gauge .tick-minor { stroke: var(--text-dim, #5a6b82);  stroke-width: 1; }
+.mecha-arc-gauge .tick-label { fill: var(--text-dim, #5a6b82); font: 9px var(--font-mono); letter-spacing: .5px; }
+.mecha-arc-gauge .needle {
+  stroke: var(--text-bright);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(241,245,249,.5));
+  transition: transform .12s cubic-bezier(.2,.7,.3,1);
+  transform-box: view-box;
+  transform-origin: 150px 150px;
+}
+.mecha-arc-gauge .needle-hub { fill: var(--bg-panel); stroke: var(--text-bright); stroke-width: 2; }
+
+.mecha-arc-gauge .readout { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); text-align: center; pointer-events: none; }
+.mecha-arc-gauge .readout .value {
+  font-size: 30px; font-weight: 700; letter-spacing: 1px;
+  color: var(--text-bright); text-shadow: 0 0 10px currentColor; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.mecha-arc-gauge .readout .unit { font-size: 11px; letter-spacing: 3px; color: var(--telemetry-cyan); text-transform: uppercase; margin-top: 2px; }
+.mecha-arc-gauge .minmax { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 1px; color: var(--text-dim, #5a6b82); margin-top: -4px; padding: 0 4px; }
+
+/* State colour overrides */
+.mecha-arc-gauge.state-warn    .arc-active { stroke: var(--tactical-amber); filter: drop-shadow(0 0 6px var(--glow-amber, rgba(245, 158, 11, 0.35))); }
+.mecha-arc-gauge.state-warn    .readout .value { color: var(--tactical-amber); }
+.mecha-arc-gauge.state-warn    .readout .unit  { color: var(--tactical-amber); }
+.mecha-arc-gauge.state-crit    .arc-active { stroke: var(--alert-crimson); filter: drop-shadow(0 0 7px var(--glow-crimson, rgba(239, 68, 68, 0.38))); }
+.mecha-arc-gauge.state-crit    .readout .value { color: var(--alert-crimson); }
+.mecha-arc-gauge.state-crit    .readout .unit  { color: var(--alert-crimson); }
+.mecha-arc-gauge.state-nominal .arc-active { stroke: var(--system-emerald); filter: drop-shadow(0 0 6px var(--glow-emerald, rgba(16, 185, 129, 0.35))); }
+
+.mecha-arc-gauge .gauge-ctl { display: flex; flex-direction: column; gap: 9px; }
+.mecha-arc-gauge .quick { display: flex; gap: 6px; }
+.mecha-arc-gauge .quick .btn { flex: 1; padding: 6px 4px; text-align: center; }
+
+/* Telemetry Oscilloscope */
+.mecha-oscilloscope { display: flex; flex-direction: column; background: var(--bg-panel); border: 1px solid var(--border-bright); }
+.mecha-oscilloscope .scope-well {
+  position: relative;
+  background: var(--bg-trough, #070a10);
+  border-bottom: 1px solid var(--border-dim);
+  overflow: hidden;
+}
+.mecha-oscilloscope canvas { display: block; width: 100%; height: 240px; }
+
+.mecha-oscilloscope .reticle { position: absolute; inset: 10px; pointer-events: none; }
+.mecha-oscilloscope .reticle span { position: absolute; width: 14px; height: 14px; border: 1px solid var(--telemetry-cyan); opacity: .5; }
+.mecha-oscilloscope .reticle .tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.mecha-oscilloscope .reticle .tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.mecha-oscilloscope .reticle .bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.mecha-oscilloscope .reticle .br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+.mecha-oscilloscope .hud { position: absolute; top: 12px; left: 16px; font-size: 10px; letter-spacing: 1px; color: var(--telemetry-cyan); text-shadow: 0 0 6px var(--glow-cyan, rgba(6, 182, 212, 0.4)); pointer-events: none; }
+.mecha-oscilloscope .hud .r { display: block; opacity: .9; }
+.mecha-oscilloscope .hud-right { left: auto; right: 16px; text-align: right; color: var(--system-emerald); text-shadow: 0 0 6px var(--glow-emerald, rgba(16, 185, 129, 0.35)); }
+.mecha-oscilloscope .hud-right.muted { color: var(--text-dim, #5a6b82); text-shadow: none; }
+
+.mecha-oscilloscope .deck { padding: 14px 16px 16px; background: var(--bg-panel); display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+.mecha-oscilloscope .deck .span-2 { grid-column: 1 / -1; }
+.mecha-oscilloscope .wave-select { display: flex; gap: 6px; flex-wrap: wrap; }
+.mecha-oscilloscope .wave-select .btn { flex: 1 1 auto; text-align: center; min-width: 58px; }
+.mecha-oscilloscope .transport { display: flex; gap: 8px; }
+.mecha-oscilloscope .transport .btn { flex: 1; text-align: center; }
