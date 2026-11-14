@@ -1,0 +1,32 @@
+/* ============================================================================
+   MECHA-UI  ·  MODULE : TACTICAL RADAR DIAL (RDR-09)
+   Zero-dependency. Semicircular azimuth rings, sweep beam, and target blips.
+   ============================================================================ */
+
+.mecha-radar-viewport {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle at center, #06150d 0%, #040806 75%);
+  border: 2px solid #004d1f;
+  border-radius: 50%;
+  box-shadow: inset 0 0 30px rgba(0, 255, 102, 0.1), 0 0 15px rgba(0, 255, 102, 0.15);
+  overflow: hidden;
+}
+.mecha-radar-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 320px;
+  z-index: 2;
+}
+.mecha-radar-reticle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
