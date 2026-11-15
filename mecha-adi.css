@@ -1,0 +1,376 @@
+:root {
+  --adi-bg: #05080f;
+  --adi-panel: #0a0f1d;
+  --adi-border: #1a2a40;
+  --adi-sky: #0a1b33;
+  --adi-ground: #1a1208;
+  --adi-horizon: #00f0ff;
+  --adi-amber: #ffaa00;
+  --adi-alert: #ff3344;
+  --adi-green: #00ff66;
+  --adi-text: #c2d5ea;
+  --adi-muted: #536b88;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background-color: var(--adi-bg);
+  color: var(--adi-text);
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.adi-shell {
+  width: 100%;
+  max-width: 1080px;
+  background: var(--adi-panel);
+  border: 1px solid var(--adi-border);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  padding: 24px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.adi-shell::before {
+  content: "AVIONICS FLIGHT SUBSYSTEM // ADI-03 HORIZON DIRECTOR";
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--adi-muted);
+  border-bottom: 1px solid var(--adi-border);
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.adi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.adi-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.adi-nav a {
+  background: #0f172a;
+  border: 1px solid var(--adi-border);
+  color: var(--adi-horizon);
+  padding: 5px 12px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.adi-nav a:hover {
+  background: var(--adi-horizon);
+  color: var(--adi-bg);
+}
+
+.adi-main {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Sphere / Sphere Housing */
+.adi-viewport {
+  width: 440px;
+  height: 440px;
+  background: #000;
+  border: 2px solid var(--adi-border);
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 240, 255, 0.1);
+  margin: 0 auto;
+}
+
+/* Artificial Horizon Drum (Pitch & Roll) */
+.adi-sphere {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: center center;
+  transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
+}
+
+/* Sky and Ground hemispheres */
+.adi-sky {
+  position: absolute;
+  top: -200%;
+  left: -50%;
+  width: 200%;
+  height: 250%;
+  background: linear-gradient(180deg, #020b18 0%, #0d284d 70%, #153c70 100%);
+}
+
+.adi-ground {
+  position: absolute;
+  top: 50%;
+  left: -50%;
+  width: 200%;
+  height: 250%;
+  background: linear-gradient(180deg, #2b1704 0%, #180d02 40%, #080401 100%);
+  border-top: 2px solid var(--adi-horizon);
+}
+
+/* Pitch Ladder */
+.pitch-ladder {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.pitch-line {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--adi-text);
+}
+
+.pitch-line::before, .pitch-line::after {
+  content: "";
+  display: inline-block;
+  height: 1px;
+  background: var(--adi-text);
+}
+
+.pitch-line.pos-20 { top: calc(50% - 90px); }
+.pitch-line.pos-10 { top: calc(50% - 45px); }
+.pitch-line.zero   { top: 50%; color: var(--adi-horizon); }
+.pitch-line.neg-10 { top: calc(50% + 45px); }
+.pitch-line.neg-20 { top: calc(50% + 90px); }
+
+.pitch-line span {
+  padding: 0 8px;
+}
+
+.pitch-line::before, .pitch-line::after {
+  width: 50px;
+}
+
+.pitch-line.pos-10::before, .pitch-line.pos-10::after,
+.pitch-line.neg-10::before, .pitch-line.neg-10::after {
+  width: 32px;
+}
+
+/* Fixed Center Reticle (Aircraft Reference) */
+.fixed-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.reticle-center-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--adi-amber);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px var(--adi-amber);
+}
+
+.reticle-wing-l, .reticle-wing-r {
+  position: absolute;
+  width: 50px;
+  height: 4px;
+  background: var(--adi-amber);
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px var(--adi-amber);
+}
+
+.reticle-wing-l { left: 0; }
+.reticle-wing-r { right: 0; }
+
+.reticle-wing-l::after, .reticle-wing-r::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 12px;
+  background: var(--adi-amber);
+  bottom: 0;
+}
+.reticle-wing-l::after { right: 0; }
+.reticle-wing-r::after { left: 0; }
+
+/* Roll Scale Index (Bezel) */
+.roll-bezel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.roll-pointer {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 12px solid var(--adi-amber);
+}
+
+/* CRT Overlay */
+.crt-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.35) 3px,
+    rgba(0, 0, 0, 0.35) 4px
+  );
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Flight Director Crossbars (FD) */
+.flight-director {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9;
+}
+
+.fd-horizontal, .fd-vertical {
+  position: absolute;
+  background: rgba(255, 51, 68, 0.85);
+  box-shadow: 0 0 6px rgba(255, 51, 68, 0.6);
+  transition: all 0.2s ease;
+}
+
+.fd-horizontal {
+  left: 15%;
+  right: 15%;
+  height: 2px;
+  top: 50%;
+}
+
+.fd-vertical {
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  left: 50%;
+}
+
+/* Side Telemetry Panels */
+.adi-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-block {
+  background: #080d17;
+  border: 1px solid var(--adi-border);
+  padding: 16px;
+}
+
+.panel-block h4 {
+  margin: 0 0 12px 0;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--adi-horizon);
+  text-transform: uppercase;
+}
+
+.telemetry-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.telemetry-label { color: var(--adi-muted); }
+.telemetry-val { color: var(--adi-text); font-weight: 700; }
+.telemetry-val.highlight { color: var(--adi-green); }
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tactical-btn {
+  background: #0e1726;
+  border: 1px solid var(--adi-border);
+  color: var(--adi-text);
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+}
+
+.tactical-btn:hover {
+  background: #19273c;
+  border-color: var(--adi-horizon);
+  color: var(--adi-horizon);
+}
+
+.tactical-btn.active {
+  background: var(--adi-horizon);
+  color: var(--adi-bg);
+  font-weight: 700;
+  border-color: var(--adi-horizon);
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.slider-group label {
+  font-size: 11px;
+  color: var(--adi-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.tactical-slider {
+  accent-color: var(--adi-horizon);
+  cursor: pointer;
+}

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // ADI-03 Tactical Attitude Indicator</title>
+  <link rel="stylesheet" href="mecha-adi.css">
+</head>
+<body>
+  <div class="adi-shell">
+    <div class="adi-header">
+      <div>
+        <h2 style="margin:0; font-size:16px; color:#00f0ff; letter-spacing:0.08em;">AVIONICS // ATTITUDE DIRECTOR INDICATOR (ADI-03)</h2>
+        <span style="font-size:11px; color:#536b88;">REAL-TIME ARTIFICIAL HORIZON, PITCH LADDER & FLIGHT DIRECTOR</span>
+      </div>
+      <div class="adi-nav">
+        <a href="index.html">← MECHA-UI HUB</a>
+        <a href="radar.html">RADAR DIAL</a>
+        <a href="telemetry.html">TELEMETRY</a>
+      </div>
+    </div>
+
+    <div class="adi-main">
+      <!-- ADI VIEWPORT -->
+      <div class="adi-viewport" id="adiViewport">
+        <!-- Drum / Sphere -->
+        <div class="adi-sphere" id="adiSphere">
+          <div class="adi-sky"></div>
+          <div class="adi-ground"></div>
+          
+          <div class="pitch-ladder">
+            <div class="pitch-line pos-20"><span>+20</span></div>
+            <div class="pitch-line pos-10"><span>+10</span></div>
+            <div class="pitch-line zero"><span>00</span></div>
+            <div class="pitch-line neg-10"><span>-10</span></div>
+            <div class="pitch-line neg-20"><span>-20</span></div>
+          </div>
+        </div>
+
+        <!-- Flight Director Crossbars -->
+        <div class="flight-director">
+          <div class="fd-horizontal" id="fdH"></div>
+          <div class="fd-vertical" id="fdV"></div>
+        </div>
+
+        <!-- Fixed Aircraft Reticle -->
+        <div class="fixed-reticle">
+          <div class="reticle-wing-l"></div>
+          <div class="reticle-center-dot"></div>
+          <div class="reticle-wing-r"></div>
+        </div>
+
+        <!-- Roll Index Bezel -->
+        <div class="roll-bezel">
+          <div class="roll-pointer"></div>
+        </div>
+
+        <!-- CRT Scanline Raster -->
+        <div class="crt-scanlines"></div>
+      </div>
+
+      <!-- SIDE TELEMETRY & CONTROLS -->
+      <div class="adi-controls-panel">
+        <div class="panel-block">
+          <h4>// FLIGHT VECTOR TELEMETRY</h4>
+          <div class="telemetry-row">
+            <span class="telemetry-label">PITCH ANGLE:</span>
+            <span class="telemetry-val highlight" id="telemetryPitch">+00.0°</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">ROLL ANGLE:</span>
+            <span class="telemetry-val highlight" id="telemetryRoll">000.0°</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">AIRSPEED:</span>
+            <span class="telemetry-val">420 KTS</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">BARO ALTITUDE:</span>
+            <span class="telemetry-val">12,450 FT</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">AUTOPILOT / FD:</span>
+            <span class="telemetry-val highlight" id="telemetryFdMode">ARMED [NAV]</span>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <h4>// ATTITUDE PRESETS & INJECTION</h4>
+          <div class="button-group">
+            <button class="tactical-btn active" id="btnLevel">LEVEL FLIGHT</button>
+            <button class="tactical-btn" id="btnClimb">CLIMB +15°</button>
+            <button class="tactical-btn" id="btnDive">DIVE -15°</button>
+            <button class="tactical-btn" id="btnBankL">BANK L 25°</button>
+            <button class="tactical-btn" id="btnBankR">BANK R 25°</button>
+          </div>
+
+          <div class="slider-group">
+            <label><span>MANUAL PITCH:</span><span id="pitchValDisplay">0°</span></label>
+            <input type="range" class="tactical-slider" id="pitchSlider" min="-30" max="30" value="0">
+          </div>
+
+          <div class="slider-group">
+            <label><span>MANUAL ROLL:</span><span id="rollValDisplay">0°</span></label>
+            <input type="range" class="tactical-slider" id="rollSlider" min="-45" max="45" value="0">
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <h4>// FLIGHT DIRECTOR COMMAND</h4>
+          <div class="button-group">
+            <button class="tactical-btn" id="btnToggleFd">TOGGLE FD CUE</button>
+            <button class="tactical-btn" id="btnTurbulence">TURBULENCE SIM</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sphere = document.getElementById('adiSphere');
+    const pitchDisplay = document.getElementById('telemetryPitch');
+    const rollDisplay = document.getElementById('telemetryRoll');
+    const pitchSlider = document.getElementById('pitchSlider');
+    const rollSlider = document.getElementById('rollSlider');
+    const pitchValDisplay = document.getElementById('pitchValDisplay');
+    const rollValDisplay = document.getElementById('rollValDisplay');
+    const fdH = document.getElementById('fdH');
+    const fdV = document.getElementById('fdV');
+
+    let currentPitch = 0;
+    let currentRoll = 0;
+    let turbulenceActive = false;
+    let turbulenceInterval = null;
+
+    function updateAttitude(pitch, roll) {
+      currentPitch = pitch;
+      currentRoll = roll;
+
+      // 4.5px per degree of pitch
+      const pitchOffset = pitch * 4.5;
+      sphere.style.transform = `rotate(${-roll}deg) translateY(${pitchOffset}px)`;
+
+      pitchDisplay.textContent = (pitch >= 0 ? '+' : '') + pitch.toFixed(1) + '°';
+      rollDisplay.textContent = (roll >= 0 ? '+' : '') + roll.toFixed(1) + '°';
+
+      pitchSlider.value = pitch;
+      rollSlider.value = roll;
+      pitchValDisplay.textContent = Math.round(pitch) + '°';
+      rollValDisplay.textContent = Math.round(roll) + '°';
+
+      // Flight director follows opposite error to guide pilot to level
+      fdH.style.transform = `translateY(${Math.max(-40, Math.min(40, -pitch * 2))}px)`;
+      fdV.style.transform = `translateX(${Math.max(-40, Math.min(40, roll * 2))}px)`;
+    }
+
+    pitchSlider.addEventListener('input', (e) => {
+      updateAttitude(parseFloat(e.target.value), currentRoll);
+    });
+
+    rollSlider.addEventListener('input', (e) => {
+      updateAttitude(currentPitch, parseFloat(e.target.value));
+    });
+
+    document.getElementById('btnLevel').addEventListener('click', () => updateAttitude(0, 0));
+    document.getElementById('btnClimb').addEventListener('click', () => updateAttitude(15, 0));
+    document.getElementById('btnDive').addEventListener('click', () => updateAttitude(-15, 0));
+    document.getElementById('btnBankL').addEventListener('click', () => updateAttitude(5, -25));
+    document.getElementById('btnBankR').addEventListener('click', () => updateAttitude(5, 25));
+
+    document.getElementById('btnToggleFd').addEventListener('click', () => {
+      const isVisible = fdH.style.display !== 'none';
+      fdH.style.display = isVisible ? 'none' : 'block';
+      fdV.style.display = isVisible ? 'none' : 'block';
+      document.getElementById('telemetryFdMode').textContent = isVisible ? 'OFF' : 'ARMED [NAV]';
+    });
+
+    document.getElementById('btnTurbulence').addEventListener('click', function() {
+      turbulenceActive = !turbulenceActive;
+      this.classList.toggle('active', turbulenceActive);
+      if (turbulenceActive) {
+        turbulenceInterval = setInterval(() => {
+          const jitterPitch = currentPitch + (Math.random() - 0.5) * 3;
+          const jitterRoll = currentRoll + (Math.random() - 0.5) * 4;
+          const pitchOffset = jitterPitch * 4.5;
+          sphere.style.transform = `rotate(${-jitterRoll}deg) translateY(${pitchOffset}px)`;
+        }, 80);
+      } else {
+        clearInterval(turbulenceInterval);
+        updateAttitude(currentPitch, currentRoll);
+      }
+    });
+
+    updateAttitude(0, 0);
+  </script>
+</body>
+</html>
