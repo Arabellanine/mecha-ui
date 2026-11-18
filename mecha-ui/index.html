@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // Retro-Brutalist Tactical Design System</title>
+  <link rel="stylesheet" href="snippets/mecha-status.css">
+  <link rel="stylesheet" href="mecha-ui.css">
+  <style>
+    body {
+      background: #07090e;
+      color: #d8e2ec;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      margin: 0;
+      padding: 24px;
+    }
+    .hud-shell {
+      max-width: 1040px;
+      margin: 0 auto;
+      border: 1px solid #212c3d;
+      background: #0d1117;
+      padding: 24px;
+    }
+    .hud-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #212c3d;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .hud-title-block h1 {
+      margin: 0 0 6px 0;
+      font-size: 18px;
+      letter-spacing: 0.1em;
+      color: #00f0ff;
+    }
+    .hud-title-block p {
+      margin: 0;
+      font-size: 12px;
+      color: #7b8ea5;
+    }
+    .suite-nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .suite-nav a {
+      background: #111a28;
+      border: 1px solid #283950;
+      color: #00f0ff;
+      padding: 6px 12px;
+      text-decoration: none;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .suite-nav a:hover {
+      background: #00f0ff;
+      color: #07090e;
+    }
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .component-card {
+      background: #090e15;
+      border: 1px solid #1f2c3f;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .component-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #00ff66;
+      letter-spacing: 0.08em;
+    }
+    .component-card p {
+      font-size: 12px;
+      color: #7b8ea5;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #1a2536;
+      padding-top: 12px;
+    }
+    .card-footer a {
+      color: #00f0ff;
+      font-size: 11px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .card-footer a:hover { text-decoration: underline; }
+    .badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border: 1px solid #00ff66;
+      color: #00ff66;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud-shell">
+    <header class="hud-header">
+      <div class="hud-title-block">
+        <h1>MECHA-UI // LIVING DESIGN SYSTEM</h1>
+        <p>Zero-bloat, high-density retro-futuristic dark tactical utilities & avionics components.</p>
+      </div>
+      <div class="suite-nav">
+        <a href="radar.html">TACTICAL RADAR</a>
+        <a href="telemetry.html">TELEMETRY</a>
+        <a href="controls.html">CONTROLS</a>
+        <a href="tokens.html">TOKENS</a>
+        <a href="showcase.html">SHOWCASE</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="component-grid">
+        <!-- RADAR DIAL -->
+        <div class="component-card">
+          <div>
+            <div class="badge">NEW · RDR-09</div>
+            <h3>TACTICAL RADAR DIAL</h3>
+            <p>Rotating 360° phosphor beam, concentric azimuth rings, vector canvas blips, and IFF hostile tracking mode.</p>
+          </div>
+          <div class="card-footer">
+            <span style="font-size: 11px; color: #495e75;">VANILLA SVG/CANVAS</span>
+            <a href="radar.html">LAUNCH RADAR →</a>
+          </div>
+        </div>
+
+        <!-- TELEMETRY & ARC GAUGE -->
+        <div class="component-card">
+          <div>
+            <div class="badge">ACTIVE · OSC-01</div>
+            <h3>TELEMETRY OSCILLOSCOPE</h3>
+            <p>Real-time phosphor-decay canvas waveform harmonic bus paired with dual analog semicircular SVG arc gauges.</p>
+          </div>
+          <div class="card-footer">
+            <span style="font-size: 11px; color: #495e75;">WEB AUDIO + SVG</span>
+            <a href="telemetry.html">VIEW TELEMETRY →</a>
+          </div>
+        </div>
+
+        <!-- HARDWARE CONTROLS -->
+        <div class="component-card">
+          <div>
+            <div class="badge">DEPLOYED · CTL-04</div>
+            <h3>TACTICAL HARDWARE CONTROLS</h3>
+            <p>Rotary detent potentiometers, toggle rocker switches with safety guards, and tactile brutalist action triggers.</p>
+          </div>
+          <div class="card-footer">
+            <span style="font-size: 11px; color: #495e75;">TACTILE CSS</span>
+            <a href="controls.html">VIEW CONTROLS →</a>
+          </div>
+        </div>
+
+        <!-- SYSTEM STATUS -->
+        <div class="component-card">
+          <div>
+            <div class="badge">DEPLOYED · STS-02</div>
+            <h3>SYSTEM STATUS MATRIX</h3>
+            <p>Modular brutalist health badges, alert indicators, and diagnostics feeds for Arabellanine web applications.</p>
+          </div>
+          <div class="card-footer">
+            <span style="font-size: 11px; color: #495e75;">STANDALONE CSS</span>
+            <a href="status.html">VIEW STATUS →</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

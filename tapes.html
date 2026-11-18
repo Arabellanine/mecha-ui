@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // AVIONICS TAPE GAUGES (ALT-04 & VSI-02)</title>
+  <link rel="stylesheet" href="mecha-tapes.css">
+</head>
+<body>
+  <div class="tape-shell">
+    <div class="tape-header">
+      <div>
+        <h2 style="margin:0; font-size:16px; color:#00f0ff; letter-spacing:0.12em; text-transform:uppercase;">
+          AVIONICS // VERTICAL TAPE GAUGES (ALT-04 / VSI-02)
+        </h2>
+        <div style="font-size:11px; color:#60738a; margin-top:4px;">
+          TACTICAL ROLLING AIRSPEED, BAROMETRIC ALTIMETER & VERTICAL SPEED INDICATOR
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="nav-btn">← MECHA-UI HUB</a>
+        <a href="adi.html" class="nav-btn">ADI-03 HORIZON</a>
+        <a href="radar.html" class="nav-btn">RADAR DIAL</a>
+      </div>
+    </div>
+
+    <div class="instrument-bay">
+      <!-- AIRSPEED TAPE -->
+      <div class="tape-column" id="spd-col">
+        <div class="tape-title">AIRSPEED (KTS)</div>
+        <div class="tape-viewport">
+          <div class="tape-ladder" id="spd-ladder"></div>
+          <div class="tape-bug-window" id="spd-readout">420</div>
+          <div class="tape-pointer"></div>
+        </div>
+        <div class="tape-subdata">
+          <span>MACH: <strong id="mach-readout">0.64</strong></span>
+          <span>MAX: <strong>650</strong></span>
+        </div>
+      </div>
+
+      <!-- CENTER VECTOR STATUS -->
+      <div class="vector-hud">
+        <div class="hud-box">
+          <div class="hud-box-label">// AVIONICS BUS TELEMETRY</div>
+          <div class="hud-data-row">
+            <span>FLIGHT REGIME:</span>
+            <span class="hud-val-green" id="regime-val">CRUISE TRANSIT</span>
+          </div>
+          <div class="hud-data-row">
+            <span>TARGET ALTITUDE:</span>
+            <span class="hud-val-cyan" id="target-alt-val">15,000 FT</span>
+          </div>
+          <div class="hud-data-row">
+            <span>AUTOTHROTTLE:</span>
+            <span class="hud-val-green">ENGAGED [SPD 420]</span>
+          </div>
+          <div class="hud-data-row">
+            <span>BARO CALIBRATION:</span>
+            <span class="hud-val-amber">29.92 INHG [STD]</span>
+          </div>
+        </div>
+
+        <div class="hud-box" style="margin-top: 14px;">
+          <div class="hud-box-label">// TACTICAL FLIGHT VECTOR INJECTION</div>
+          <div class="tape-controls-grid">
+            <button class="t-btn active" id="btn-cruise">CRUISE LEVEL</button>
+            <button class="t-btn" id="btn-climb">TACTICAL CLIMB (+4,000 FPM)</button>
+            <button class="t-btn" id="btn-dive">RAPID DESCENT (-6,000 FPM)</button>
+            <button class="t-btn" id="btn-break">DIVE BRAKE / DECEL</button>
+          </div>
+          <div style="margin-top: 14px;">
+            <label class="control-label">SIMULATED AIRSPEED TARGET: <span id="manual-spd-lbl">420 KTS</span></label>
+            <input type="range" min="150" max="650" value="420" class="mecha-slider" id="slider-spd">
+          </div>
+          <div style="margin-top: 10px;">
+            <label class="control-label">SIMULATED VERTICAL SPEED: <span id="manual-vsi-lbl">0 FPM</span></label>
+            <input type="range" min="-6000" max="6000" step="100" value="0" class="mecha-slider" id="slider-vsi">
+          </div>
+        </div>
+      </div>
+
+      <!-- ALTIMETER TAPE -->
+      <div class="tape-column" id="alt-col">
+        <div class="tape-title">BARO ALT (FT)</div>
+        <div class="tape-viewport">
+          <div class="tape-ladder" id="alt-ladder"></div>
+          <div class="tape-bug-window" id="alt-readout">14,200</div>
+          <div class="tape-pointer right"></div>
+        </div>
+        <div class="tape-subdata">
+          <span>QNH: <strong>1013 HPA</strong></span>
+          <span>D-ALT: <strong id="dalt-readout">14,850</strong></span>
+        </div>
+      </div>
+
+      <!-- VERTICAL SPEED (VSI) TAPE -->
+      <div class="vsi-column">
+        <div class="tape-title">VSI (1000 FPM)</div>
+        <div class="vsi-scale">
+          <div class="vsi-mark" style="top:0%">+6</div>
+          <div class="vsi-mark" style="top:16.6%">+4</div>
+          <div class="vsi-mark" style="top:33.3%">+2</div>
+          <div class="vsi-mark zero" style="top:50%">0</div>
+          <div class="vsi-mark" style="top:66.6%">-2</div>
+          <div class="vsi-mark" style="top:83.3%">-4</div>
+          <div class="vsi-mark" style="top:100%">-6</div>
+          <div class="vsi-needle" id="vsi-needle"></div>
+        </div>
+        <div class="vsi-readout" id="vsi-val">0</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let curSpd = 420;
+    let targetSpd = 420;
+    let curAlt = 14200;
+    let curVsi = 0;
+    let targetVsi = 0;
+
+    const spdLadder = document.getElementById('spd-ladder');
+    const altLadder = document.getElementById('alt-ladder');
+    const spdReadout = document.getElementById('spd-readout');
+    const altReadout = document.getElementById('alt-readout');
+    const machReadout = document.getElementById('mach-readout');
+    const daltReadout = document.getElementById('dalt-readout');
+    const vsiNeedle = document.getElementById('vsi-needle');
+    const vsiVal = document.getElementById('vsi-val');
+    const regimeVal = document.getElementById('regime-val');
+
+    // Build Airspeed Ladder (100 to 700 kts in 10-knot intervals)
+    for (let s = 100; s <= 700; s += 10) {
+      const mark = document.createElement('div');
+      mark.className = 'ladder-tick' + (s % 50 === 0 ? ' major' : '');
+      mark.style.bottom = `${(s - 100) * 8}px`;
+      if (s % 50 === 0) {
+        const lbl = document.createElement('span');
+        lbl.className = 'tick-label';
+        lbl.textContent = s;
+        mark.appendChild(lbl);
+      }
+      spdLadder.appendChild(mark);
+    }
+
+    // Build Altitude Ladder (8,000 to 22,000 ft in 100-ft intervals)
+    for (let a = 8000; a <= 22000; a += 100) {
+      const mark = document.createElement('div');
+      mark.className = 'ladder-tick right' + (a % 500 === 0 ? ' major' : '');
+      mark.style.bottom = `${(a - 8000) * 0.8}px`;
+      if (a % 500 === 0) {
+        const lbl = document.createElement('span');
+        lbl.className = 'tick-label right';
+        lbl.textContent = (a / 1000).toFixed(1) + 'k';
+        mark.appendChild(lbl);
+      }
+      altLadder.appendChild(mark);
+    }
+
+    function updateInstruments() {
+      // Physics easing
+      curSpd += (targetSpd - curSpd) * 0.08;
+      curVsi += (targetVsi - curVsi) * 0.08;
+      curAlt += (curVsi / 60) * 0.05;
+
+      // Airspeed update
+      const spdOffset = (curSpd - 100) * 8 - 180;
+      spdLadder.style.transform = `translateY(${spdOffset}px)`;
+      spdReadout.textContent = Math.round(curSpd);
+      machReadout.textContent = (curSpd / 661.47).toFixed(2);
+
+      // Altitude update
+      const altOffset = (curAlt - 8000) * 0.8 - 180;
+      altLadder.style.transform = `translateY(${altOffset}px)`;
+      altReadout.textContent = Math.round(curAlt).toLocaleString();
+      daltReadout.textContent = Math.round(curAlt * 1.045).toLocaleString();
+
+      // VSI update (-6000 to +6000 mapped to top: 100% to 0%)
+      const vsiClamp = Math.max(-6000, Math.min(6000, curVsi));
+      const vsiPct = 50 - (vsiClamp / 6000) * 50;
+      vsiNeedle.style.top = `${vsiPct}%`;
+      vsiVal.textContent = (curVsi >= 0 ? '+' : '') + Math.round(curVsi);
+
+      requestAnimationFrame(updateInstruments);
+    }
+    requestAnimationFrame(updateInstruments);
+
+    // Event controls
+    const sliderSpd = document.getElementById('slider-spd');
+    const sliderVsi = document.getElementById('slider-vsi');
+    const manualSpdLbl = document.getElementById('manual-spd-lbl');
+    const manualVsiLbl = document.getElementById('manual-vsi-lbl');
+
+    sliderSpd.addEventListener('input', (e) => {
+      targetSpd = parseFloat(e.target.value);
+      manualSpdLbl.textContent = `${targetSpd} KTS`;
+      clearActiveButtons();
+    });
+
+    sliderVsi.addEventListener('input', (e) => {
+      targetVsi = parseFloat(e.target.value);
+      manualVsiLbl.textContent = `${targetVsi} FPM`;
+      clearActiveButtons();
+      regimeVal.textContent = targetVsi > 100 ? 'RAPID ASCENT' : (targetVsi < -100 ? 'PENETRATION DESCENT' : 'CRUISE LEVEL');
+    });
+
+    function clearActiveButtons() {
+      document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    document.getElementById('btn-cruise').addEventListener('click', () => {
+      clearActiveButtons();
+      document.getElementById('btn-cruise').classList.add('active');
+      targetSpd = 420;
+      targetVsi = 0;
+      sliderSpd.value = 420;
+      sliderVsi.value = 0;
+      manualSpdLbl.textContent = '420 KTS';
+      manualVsiLbl.textContent = '0 FPM';
+      regimeVal.textContent = 'CRUISE TRANSIT';
+    });
+
+    document.getElementById('btn-climb').addEventListener('click', () => {
+      clearActiveButtons();
+      document.getElementById('btn-climb').classList.add('active');
+      targetSpd = 380;
+      targetVsi = 4000;
+      sliderSpd.value = 380;
+      sliderVsi.value = 4000;
+      manualSpdLbl.textContent = '380 KTS';
+      manualVsiLbl.textContent = '+4000 FPM';
+      regimeVal.textContent = 'TACTICAL CLIMB';
+    });
+
+    document.getElementById('btn-dive').addEventListener('click', () => {
+      clearActiveButtons();
+      document.getElementById('btn-dive').classList.add('active');
+      targetSpd = 540;
+      targetVsi = -5500;
+      sliderSpd.value = 540;
+      sliderVsi.value = -5500;
+      manualSpdLbl.textContent = '540 KTS';
+      manualVsiLbl.textContent = '-5500 FPM';
+      regimeVal.textContent = 'RAPID DESCENT';
+    });
+
+    document.getElementById('btn-break').addEventListener('click', () => {
+      clearActiveButtons();
+      document.getElementById('btn-break').classList.add('active');
+      targetSpd = 210;
+      targetVsi = -800;
+      sliderSpd.value = 210;
+      sliderVsi.value = -800;
+      manualSpdLbl.textContent = '210 KTS';
+      manualVsiLbl.textContent = '-800 FPM';
+      regimeVal.textContent = 'DIVE BRAKE / APPROACH';
+    });
+  </script>
+</body>
+</html>
