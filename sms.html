@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MECHA-UI // SMS-04 Stores Management System</title>
+  <link rel="stylesheet" href="mecha-ui.css">
+  <link rel="stylesheet" href="mecha-sms.css">
+</head>
+<body>
+  <div class="sms-shell">
+    <header class="sms-header">
+      <div class="sms-title-block">
+        <h1>STORES MANAGEMENT // SMS-04</h1>
+        <p>Tactical Hardpoint Matrix & Selective Ordnance Release Bus</p>
+      </div>
+      <div class="top-nav">
+        <a href="index.html">← INDEX</a>
+        <a href="warn.html">ANNUNCIATOR</a>
+        <a href="tapes.html">TAPES</a>
+        <a href="adi.html">ADI</a>
+        <a href="radar.html">RADAR</a>
+      </div>
+    </header>
+
+    <!-- MASTER CONTROLLER STRIP -->
+    <div class="sms-master-bar">
+      <div class="master-arm-switch" id="masterArmToggle">
+        <div class="arm-toggle-indicator"></div>
+        <div class="arm-label">
+          <span class="main-txt">SAFE</span>
+          <span class="sub-txt">MASTER ARM [CLICK]</span>
+        </div>
+      </div>
+
+      <div class="action-cluster">
+        <button class="sms-btn" id="stepPylonBtn">CYCLE STATION [SPACE]</button>
+        <button class="sms-btn" id="releaseBtn">RELEASE STORE [ENTER]</button>
+        <button class="sms-btn sms-btn-jettison" id="jettisonBtn">EMERGENCY JETTISON</button>
+      </div>
+
+      <div style="text-align: right; font-size: 11px;">
+        <span style="color: var(--sms-text-dim); display: block;">ORDNANCE BUS</span>
+        <span style="font-weight: 700; color: var(--sms-cyan);" id="busStatus">MIL-STD-1760C ONLINE</span>
+      </div>
+    </div>
+
+    <!-- 5 HARDPOINT PYLON STATIONS -->
+    <div class="stations-container" id="stationsContainer">
+      <!-- STATION 1 (OUTBOARD L) -->
+      <div class="pylon-station selected" data-station="1" data-type="AIM-9X" data-qty="2">
+        <span class="station-id">STA 01 // L-OUTBOARD</span>
+        <div class="station-glyph">
+          <svg viewBox="0 0 32 64" fill="none" stroke="currentColor">
+            <path d="M16 4 L20 16 L20 54 L24 60 L8 60 L12 54 L12 16 Z" stroke="#00f0ff" stroke-width="2"/>
+            <line x1="8" y1="36" x2="24" y2="36" stroke="#00f0ff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="ordnance-name">AIM-9X</div>
+        <span class="ordnance-status status-rdy">STANDBY</span>
+        <span class="station-qty">QTY: 2</span>
+      </div>
+
+      <!-- STATION 2 (INBOARD L) -->
+      <div class="pylon-station" data-station="2" data-type="AGM-88E" data-qty="1">
+        <span class="station-id">STA 02 // L-INBOARD</span>
+        <div class="station-glyph">
+          <svg viewBox="0 0 32 64" fill="none" stroke="currentColor">
+            <path d="M16 2 L22 18 L22 52 L26 62 L6 62 L10 52 L10 18 Z" stroke="#ffb300" stroke-width="2"/>
+            <polygon points="12,32 20,32 22,40 10,40" fill="#ffb300" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="ordnance-name">AGM-88E</div>
+        <span class="ordnance-status status-rdy">STANDBY</span>
+        <span class="station-qty">QTY: 1</span>
+      </div>
+
+      <!-- STATION 3 (CENTERLINE) -->
+      <div class="pylon-station" data-station="3" data-type="GBU-31" data-qty="1">
+        <span class="station-id">STA 03 // CENTERLINE</span>
+        <div class="station-glyph">
+          <svg viewBox="0 0 32 64" fill="none" stroke="currentColor">
+            <path d="M16 2 Q24 16 24 48 L26 62 L6 62 L8 48 Q8 16 16 2 Z" stroke="#00ff66" stroke-width="2"/>
+            <circle cx="16" cy="30" r="3" fill="#00ff66"/>
+          </svg>
+        </div>
+        <div class="ordnance-name">GBU-31 JDAM</div>
+        <span class="ordnance-status status-rdy">STANDBY</span>
+        <span class="station-qty">QTY: 1</span>
+      </div>
+
+      <!-- STATION 4 (INBOARD R) -->
+      <div class="pylon-station" data-station="4" data-type="AGM-88E" data-qty="1">
+        <span class="station-id">STA 04 // R-INBOARD</span>
+        <div class="station-glyph">
+          <svg viewBox="0 0 32 64" fill="none" stroke="currentColor">
+            <path d="M16 2 L22 18 L22 52 L26 62 L6 62 L10 52 L10 18 Z" stroke="#ffb300" stroke-width="2"/>
+            <polygon points="12,32 20,32 22,40 10,40" fill="#ffb300" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="ordnance-name">AGM-88E</div>
+        <span class="ordnance-status status-rdy">STANDBY</span>
+        <span class="station-qty">QTY: 1</span>
+      </div>
+
+      <!-- STATION 5 (OUTBOARD R) -->
+      <div class="pylon-station" data-station="5" data-type="AIM-9X" data-qty="2">
+        <span class="station-id">STA 05 // R-OUTBOARD</span>
+        <div class="station-glyph">
+          <svg viewBox="0 0 32 64" fill="none" stroke="currentColor">
+            <path d="M16 4 L20 16 L20 54 L24 60 L8 60 L12 54 L12 16 Z" stroke="#00f0ff" stroke-width="2"/>
+            <line x1="8" y1="36" x2="24" y2="36" stroke="#00f0ff" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="ordnance-name">AIM-9X</div>
+        <span class="ordnance-status status-rdy">STANDBY</span>
+        <span class="station-qty">QTY: 2</span>
+      </div>
+    </div>
+
+    <!-- TELEMETRY & WEAPONS INTERFACE STATUS -->
+    <div class="sms-telemetry-bar">
+      <div class="telem-box">
+        <span class="lbl">SELECTED STATION</span>
+        <span class="val" id="dispStation">STA 01 [AIM-9X]</span>
+      </div>
+      <div class="telem-box">
+        <span class="lbl">MASTER WEAPON STATUS</span>
+        <span class="val" id="dispArmState" style="color: var(--sms-green);">SYSTEM SAFE</span>
+      </div>
+      <div class="telem-box">
+        <span class="lbl">PYLON INTERFACE BUS</span>
+        <span class="val">1760-SYNC / 100% OK</span>
+      </div>
+      <div class="telem-box">
+        <span class="lbl">PAYLOAD TOTAL</span>
+        <span class="val" id="dispTotalPayload">7 STORES MOUNTED</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Web Audio tactical sound synthesizer
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration, gainVal = 0.1) {
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    let isArmed = false;
+    let activeStationIndex = 0;
+    const stations = Array.from(document.querySelectorAll('.pylon-station'));
+    const armToggle = document.getElementById('masterArmToggle');
+    const armLabel = armToggle.querySelector('.main-txt');
+    const dispArmState = document.getElementById('dispArmState');
+    const dispStation = document.getElementById('dispStation');
+    const dispTotalPayload = document.getElementById('dispTotalPayload');
+
+    function updateStationUI() {
+      stations.forEach((st, idx) => {
+        st.classList.toggle('selected', idx === activeStationIndex);
+        const statusEl = st.querySelector('.ordnance-status');
+        const qty = parseInt(st.getAttribute('data-qty'), 10);
+        
+        if (qty === 0) {
+          st.classList.add('empty');
+          statusEl.textContent = 'EMPTY';
+          statusEl.className = 'ordnance-status status-empty';
+        } else if (isArmed) {
+          statusEl.textContent = 'ARMED';
+          statusEl.className = 'ordnance-status status-armed';
+        } else {
+          statusEl.textContent = 'STANDBY';
+          statusEl.className = 'ordnance-status status-rdy';
+        }
+      });
+
+      const current = stations[activeStationIndex];
+      const type = current.getAttribute('data-type');
+      const stNum = current.getAttribute('data-station');
+      const qty = current.getAttribute('data-qty');
+      dispStation.textContent = `STA 0${stNum} [${type}] (x${qty})`;
+
+      let total = 0;
+      stations.forEach(s => total += parseInt(s.getAttribute('data-qty'), 10));
+      dispTotalPayload.textContent = `${total} STORES MOUNTED`;
+    }
+
+    function toggleMasterArm() {
+      isArmed = !isArmed;
+      armToggle.classList.toggle('armed', isArmed);
+      if (isArmed) {
+        armLabel.textContent = 'ARMED';
+        dispArmState.textContent = 'HOT // WEAPONS FREE';
+        dispArmState.style.color = 'var(--sms-red)';
+        playTone(880, 'sawtooth', 0.15, 0.15);
+      } else {
+        armLabel.textContent = 'SAFE';
+        dispArmState.textContent = 'SYSTEM SAFE';
+        dispArmState.style.color = 'var(--sms-green)';
+        playTone(440, 'sine', 0.1, 0.1);
+      }
+      updateStationUI();
+    }
+
+    function cycleStation() {
+      activeStationIndex = (activeStationIndex + 1) % stations.length;
+      playTone(560, 'square', 0.05, 0.05);
+      updateStationUI();
+    }
+
+    function releaseStore() {
+      const current = stations[activeStationIndex];
+      let qty = parseInt(current.getAttribute('data-qty'), 10);
+
+      if (!isArmed) {
+        playTone(220, 'sine', 0.25, 0.2);
+        alert('INTERLOCK FAULT: CANNOT RELEASE STORE WHILE MASTER ARM IS SAFE');
+        return;
+      }
+
+      if (qty > 0) {
+        qty--;
+        current.setAttribute('data-qty', qty);
+        current.querySelector('.station-qty').textContent = `QTY: ${qty}`;
+        playTone(180, 'triangle', 0.4, 0.3);
+        updateStationUI();
+      } else {
+        playTone(150, 'sawtooth', 0.2, 0.2);
+      }
+    }
+
+    function emergencyJettison() {
+      stations.forEach(st => {
+        st.setAttribute('data-qty', 0);
+        st.querySelector('.station-qty').textContent = 'QTY: 0';
+      });
+      playTone(120, 'sawtooth', 0.6, 0.3);
+      updateStationUI();
+    }
+
+    armToggle.addEventListener('click', toggleMasterArm);
+    document.getElementById('stepPylonBtn').addEventListener('click', cycleStation);
+    document.getElementById('releaseBtn').addEventListener('click', releaseStore);
+    document.getElementById('jettisonBtn').addEventListener('click', emergencyJettison);
+
+    stations.forEach((st, idx) => {
+      st.addEventListener('click', () => {
+        activeStationIndex = idx;
+        playTone(560, 'square', 0.05, 0.05);
+        updateStationUI();
+      });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        cycleStation();
+      } else if (e.code === 'Enter') {
+        e.preventDefault();
+        releaseStore();
+      }
+    });
+
+    updateStationUI();
+  </script>
+</body>
+</html>

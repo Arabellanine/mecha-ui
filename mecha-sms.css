@@ -1,0 +1,291 @@
+:root {
+  --sms-bg: #06090e;
+  --sms-panel: #0b1017;
+  --sms-card: #0e1520;
+  --sms-border: #1a2636;
+  --sms-border-active: #2b3d54;
+  --sms-text: #d8e4f0;
+  --sms-text-dim: #5c7088;
+  
+  --sms-cyan: #00f0ff;
+  --sms-green: #00ff66;
+  --sms-amber: #ffb300;
+  --sms-red: #ff3344;
+  
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
+}
+
+body {
+  background: var(--sms-bg);
+  color: var(--sms-text);
+  font-family: var(--font-mono);
+  margin: 0;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.sms-shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  border: 1px solid var(--sms-border);
+  background: var(--sms-panel);
+  padding: 24px;
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.sms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--sms-border);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.sms-title-block h1 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  color: var(--sms-cyan);
+}
+
+.sms-title-block p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--sms-text-dim);
+}
+
+.top-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.top-nav a {
+  background: #111a28;
+  border: 1px solid #283950;
+  color: var(--sms-cyan);
+  padding: 6px 12px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+}
+
+.top-nav a:hover {
+  background: var(--sms-cyan);
+  color: var(--sms-bg);
+}
+
+/* MASTER ARM & JETTISON CONTROL STRIP */
+.sms-master-bar {
+  display: grid;
+  grid-template-columns: 220px 1fr 240px;
+  gap: 20px;
+  background: var(--sms-card);
+  border: 1px solid var(--sms-border);
+  padding: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.master-arm-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #080c12;
+  border: 2px solid #281414;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+.master-arm-switch.armed {
+  border-color: var(--sms-red);
+  background: #240a0d;
+  box-shadow: 0 0 16px rgba(255, 51, 68, 0.4);
+}
+
+.arm-toggle-indicator {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #5a1919;
+  background: #190505;
+  transition: all 0.15s ease;
+}
+
+.master-arm-switch.armed .arm-toggle-indicator {
+  background: var(--sms-red);
+  box-shadow: 0 0 10px var(--sms-red);
+}
+
+.arm-label .main-txt {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  display: block;
+  color: #7a2b2b;
+}
+
+.master-arm-switch.armed .arm-label .main-txt {
+  color: #fff;
+  text-shadow: 0 0 6px var(--sms-red);
+}
+
+.arm-label .sub-txt {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--sms-text-dim);
+}
+
+/* HARDPOINT STATIONS GRID */
+.stations-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pylon-station {
+  background: var(--sms-card);
+  border: 1px solid var(--sms-border);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.pylon-station.selected {
+  border-color: var(--sms-cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+.pylon-station.empty {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.station-id {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--sms-text-dim);
+  margin-bottom: 8px;
+}
+
+.station-glyph {
+  width: 48px;
+  height: 64px;
+  margin: 8px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.station-glyph svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ordnance-name {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sms-cyan);
+  margin-bottom: 4px;
+}
+
+.ordnance-status {
+  font-size: 9px;
+  padding: 2px 6px;
+  border: 1px solid var(--sms-border);
+  letter-spacing: 0.1em;
+}
+
+.status-rdy {
+  color: var(--sms-green);
+  border-color: var(--sms-green);
+}
+
+.status-armed {
+  color: var(--sms-red);
+  border-color: var(--sms-red);
+  animation: pulse-red 1s infinite alternate;
+}
+
+.status-empty {
+  color: var(--sms-text-dim);
+  border-color: var(--sms-border);
+}
+
+@keyframes pulse-red {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; filter: brightness(1.2); }
+}
+
+.station-qty {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+}
+
+/* RELEASE & JETTISON CONTROL BUTTONS */
+.action-cluster {
+  display: flex;
+  gap: 12px;
+}
+
+.sms-btn {
+  background: #111b29;
+  border: 1px solid var(--sms-border-active);
+  color: var(--sms-text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 14px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: all 0.15s ease;
+}
+
+.sms-btn:hover {
+  background: var(--sms-cyan);
+  color: var(--sms-bg);
+}
+
+.sms-btn-jettison {
+  border-color: #5a1919;
+  color: #ff5566;
+  background: #1a080a;
+}
+
+.sms-btn-jettison:hover {
+  background: var(--sms-red);
+  color: #fff;
+}
+
+/* WIRING TELEMETRY FOOTER */
+.sms-telemetry-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  background: #080c13;
+  border: 1px solid var(--sms-border);
+  padding: 12px 16px;
+  font-size: 10px;
+}
+
+.telem-box .lbl {
+  color: var(--sms-text-dim);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.telem-box .val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
